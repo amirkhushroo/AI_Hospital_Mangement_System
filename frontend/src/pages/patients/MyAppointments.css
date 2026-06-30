@@ -1,0 +1,115 @@
+/* ====================== PAGE ====================== */
+
+.appointments-container{
+    min-height:100vh;
+    background:#eef5ff;
+    padding:40px 20px;
+}
+
+/* ====================== TITLE ====================== */
+
+.appointments-container h1{
+    text-align:center;
+    color:#1565c0;
+    margin-bottom:40px;
+    font-size:36px;
+}
+
+/* ====================== NO APPOINTMENTS ====================== */
+
+.no-appointments{
+    text-align:center;
+    background:white;
+    padding:40px;
+    max-width:500px;
+    margin:50px auto;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.no-appointments h3{
+    color:#1565c0;
+    margin-bottom:10px;
+}
+
+.no-appointments p{
+    color:#666;
+}
+
+/* ====================== APPOINTMENT CARD ====================== */
+
+.appointment-card{
+    background:white;
+    max-width:700px;
+    margin:20px auto;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    transition:.3s;
+}
+
+.appointment-card:hover{
+    transform:translateY(-5px);
+}
+
+.appointment-card h3{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+
+.appointment-card p{
+    margin:10px 0;
+    color:#444;
+    font-size:16px;
+}
+
+.appointment-card strong{
+    color:#000;
+}
+
+/* ====================== STATUS ====================== */
+
+.status{
+    color:#1565c0;
+    font-weight:bold;
+}
+
+/* ====================== CANCEL BUTTON ====================== */
+
+.cancel-btn{
+    margin-top:20px;
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    background:#d32f2f;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.cancel-btn:hover{
+    background:#b71c1c;
+}
+
+/* ====================== RESPONSIVE ====================== */
+
+@media(max-width:768px){
+
+    .appointments-container{
+        padding:20px;
+    }
+
+    .appointments-container h1{
+        font-size:30px;
+    }
+
+    .appointment-card{
+        padding:20px;
+    }
+
+    .cancel-btn{
+        width:100%;
+    }
+
+}

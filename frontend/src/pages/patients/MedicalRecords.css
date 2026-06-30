@@ -1,0 +1,66 @@
+.medical-container{
+    min-height:100vh;
+    background:#eef5ff;
+    padding:40px 20px;
+}
+
+.medical-container h1{
+    text-align:center;
+    color:#1565c0;
+    margin-bottom:40px;
+}
+
+.record-card{
+    max-width:750px;
+    margin:20px auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    transition:.3s;
+}
+
+.record-card:hover{
+    transform:translateY(-5px);
+}
+
+.record-card h2{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+
+.record-card p{
+    margin:10px 0;
+    font-size:16px;
+    color:#444;
+}
+
+.record-card strong{
+    color:#000;
+}
+
+.no-records{
+    max-width:500px;
+    margin:60px auto;
+    background:white;
+    padding:40px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.no-records h3{
+    color:#1565c0;
+}
+
+@media(max-width:768px){
+
+    .medical-container{
+        padding:20px;
+    }
+
+    .record-card{
+        padding:20px;
+    }
+
+}
