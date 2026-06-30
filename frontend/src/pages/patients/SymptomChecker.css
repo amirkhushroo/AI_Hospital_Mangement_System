@@ -1,0 +1,130 @@
+/* ====================== PAGE ====================== */
+
+.symptom-container{
+    min-height:100vh;
+    background:#eef5ff;
+    padding:40px 20px;
+}
+
+.symptom-container h1{
+    text-align:center;
+    color:#1565c0;
+    margin-bottom:30px;
+}
+
+/* ====================== INPUT ====================== */
+
+.symptom-container textarea{
+    width:100%;
+    max-width:800px;
+    display:block;
+    margin:0 auto;
+    padding:15px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+    resize:none;
+    outline:none;
+}
+
+.symptom-container textarea:focus{
+    border-color:#1565c0;
+}
+
+/* ====================== BUTTON ====================== */
+
+.symptom-container button{
+    display:block;
+    margin:20px auto;
+    padding:12px 30px;
+    background:#1565c0;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.symptom-container button:hover{
+    background:#0d47a1;
+}
+
+/* ====================== RESULT CARD ====================== */
+
+.result-card{
+    max-width:900px;
+    margin:30px auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.result-card h2{
+    color:#1565c0;
+    margin-bottom:20px;
+}
+
+.result-card p{
+    margin:12px 0;
+    color:#444;
+    line-height:1.6;
+}
+
+.result-card strong{
+    color:#000;
+}
+
+/* ====================== EMERGENCY ====================== */
+
+.emergency-box{
+    margin:20px 0;
+    padding:15px;
+    background:#ffebee;
+    color:#c62828;
+    border-left:5px solid #d32f2f;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* ====================== DOCTOR CARD ====================== */
+
+.doctor-card{
+    margin-top:20px;
+    padding:20px;
+    background:#f8f9fa;
+    border-radius:10px;
+    border-left:5px solid #1565c0;
+}
+
+.doctor-card h4{
+    color:#1565c0;
+    margin-bottom:10px;
+}
+
+.doctor-card p{
+    margin:6px 0;
+}
+
+/* ====================== RESPONSIVE ====================== */
+
+@media(max-width:768px){
+
+    .symptom-container{
+        padding:20px;
+    }
+
+    .symptom-container textarea{
+        font-size:15px;
+    }
+
+    .result-card{
+        padding:20px;
+    }
+
+    .symptom-container button{
+        width:100%;
+    }
+
+}
