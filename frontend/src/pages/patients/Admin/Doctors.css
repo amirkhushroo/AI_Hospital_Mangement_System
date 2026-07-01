@@ -1,0 +1,105 @@
+.doctors-container{
+    padding:30px;
+    background:#f5f8ff;
+    min-height:100vh;
+}
+
+.doctors-container h1{
+    text-align:center;
+    color:#1565c0;
+    margin-bottom:20px;
+    font-size:35px;
+}
+
+.search-box{
+    width:100%;
+    max-width:500px;
+    display:block;
+    margin:0 auto 20px;
+    padding:14px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+    font-size:16px;
+}
+
+.search-box:focus{
+    border-color:#1565c0;
+}
+
+.doctor-count{
+    text-align:center;
+    font-size:18px;
+    font-weight:600;
+    color:#444;
+    margin-bottom:25px;
+}
+
+.doctor-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+}
+
+.doctor-card{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.doctor-card:hover{
+    transform:translateY(-5px);
+}
+
+.doctor-card h2{
+    color:#1565c0;
+    margin-bottom:15px;
+}
+
+.doctor-card p{
+    margin:8px 0;
+    color:#555;
+    line-height:1.6;
+}
+
+.delete-btn{
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#e53935;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.delete-btn:hover{
+    background:#c62828;
+}
+
+.no-data{
+    text-align:center;
+    font-size:20px;
+    color:#777;
+    margin-top:40px;
+}
+
+@media(max-width:768px){
+
+    .doctors-container{
+        padding:20px;
+    }
+
+    .doctor-grid{
+        grid-template-columns:1fr;
+    }
+
+    .search-box{
+        max-width:100%;
+    }
+
+}
