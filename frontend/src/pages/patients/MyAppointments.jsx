@@ -74,7 +74,7 @@ function MyAppointments() {
 
       <h1>📅 My Appointments</h1>
 
-      {appointments.length === 0 ? (
+     {Array.isArray(appointments) && appointments.length === 0 ? (
 
         <div className="no-appointments">
           <h3>No Appointments Found</h3>
@@ -82,18 +82,21 @@ function MyAppointments() {
 
       ) : (
 
-        appointments.map((appointment) => (
+        Array.isArray(appointments) &&
+appointments.map((appointment) => (
 
           <div
             className="appointment-card"
             key={appointment._id}
           >
 
-            <h3>👨‍⚕️ Dr. {appointment.doctor.name}</h3>
+            <h3>
+  👨‍⚕️ Dr. {appointment.doctor?.name || "Doctor Not Assigned"}
+</h3>
 
             <p>
               <strong>Specialization:</strong>{" "}
-              {appointment.doctor.specialization}
+             {appointment.doctor?.specialization || "N/A"}
             </p>
 
             <p>
