@@ -1,0 +1,128 @@
+.about-container {
+  min-height: 100vh;
+  padding: 3rem 1.5rem 4rem;
+  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.14), transparent 28%),
+    var(--bg);
+}
+
+.hero {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3.5rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  color: var(--primary);
+  margin-bottom: 1.25rem;
+}
+
+.hero p {
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+.about-section,
+.services,
+.doctor-section,
+.why-us {
+  max-width: 1180px;
+  margin: 0 auto 2rem;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 28px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.about-section h2,
+.services h2,
+.doctor-section h2,
+.why-us h2 {
+  color: var(--primary);
+  font-size: clamp(2rem, 2.5vw, 3rem);
+  margin-bottom: 1.5rem;
+}
+
+.about-section p {
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.8;
+}
+
+.service-grid,
+.doctor-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.service-card,
+.doctor-card,
+.why-us li {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  padding: 1.75rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.service-card:hover,
+.doctor-card:hover,
+.why-us li:hover {
+  transform: translateY(-6px);
+}
+
+.service-card h3,
+.doctor-card h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.service-card p,
+.doctor-card p,
+.why-us li {
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.doctor-card {
+  text-align: left;
+}
+
+.why-us ul {
+  padding: 0;
+}
+
+.why-us li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .about-section,
+  .services,
+  .doctor-section,
+  .why-us {
+    padding: 2.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding-top: 3rem;
+  }
+
+  .about-section,
+  .services,
+  .doctor-section,
+  .why-us {
+    border-radius: 22px;
+  }
+}
