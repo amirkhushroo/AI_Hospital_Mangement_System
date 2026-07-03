@@ -277,19 +277,6 @@ GET /api/admin/appointments
 
 GET /api/admin/ai-reports
 ```
-
----
-
-# 📷 Screenshots
-
-* Home Page
-* Patient Dashboard
-* Doctor Dashboard
-* Admin Dashboard
-* AI Symptom Checker
-
-(Add screenshots after deployment.)
-
 ---
 
 # 🎯 Future Improvements
