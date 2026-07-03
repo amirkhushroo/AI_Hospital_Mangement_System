@@ -292,6 +292,22 @@ GET /api/admin/ai-reports
 * Analytics Dashboard
 * Multi Hospital Support
 
+---
+
+# 👥 Team Members
+
+This project was developed collaboratively by:
+
+| Team Member | Module |
+|--------------------------|-------------------------------------|
+| **Mohammad Amaan**       | Patient Module & AI Symptom Checker |
+| **Bilal Ahmad Mansoori** | Doctor Module |
+| **Amir Khushroo**        | Admin Module |
+| **Falak Anwar**          | Appointment Module |
+| **Muhammad Arshad**      | UI & Documentation |
+
+---
+
 # 📄 License
 
 This project is developed for educational and learning purposes.
