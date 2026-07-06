@@ -36,7 +36,7 @@ function Home() {
         <div className="hero-left">
 
           <span className="hero-tag">
-            🤖 AI Powered Smart Healthcare
+             AI Powered Hospital Management System
           </span>
 
           <h1>
