@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stethoscope, User } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
@@ -71,7 +72,7 @@ function Patients() {
 
     <div className="patients-container">
 
-      <h1>👨‍⚕️ My Patients</h1>
+      <h1><Stethoscope size={20} /> My Patients</h1>
 
       <input
         type="text"
@@ -98,7 +99,7 @@ function Patients() {
             >
 
               <h2>
-                👤 {item.patient.name}
+                <User size={18} /> {item.patient.name}
               </h2>
 
               <p>

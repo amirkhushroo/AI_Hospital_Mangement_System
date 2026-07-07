@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Activity, Brain, User } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Reports.css";
@@ -88,7 +89,7 @@ function Reports() {
     <div className="reports-container">
 
       <h1>
-        📊 Hospital Reports
+        <Activity size={20} /> Hospital Reports
       </h1>
 
       <div className="stats-grid">
@@ -116,7 +117,7 @@ function Reports() {
       </div>
 
       <h2 className="report-title">
-        🤖 AI Reports
+        <Brain size={18} /> AI Reports
       </h2>
 
       <div className="report-grid">
@@ -137,7 +138,7 @@ function Reports() {
             >
 
               <h3>
-                👤 {report.patient?.name}
+                <User size={16} /> {report.patient?.name}
               </h3>
 
               <p>

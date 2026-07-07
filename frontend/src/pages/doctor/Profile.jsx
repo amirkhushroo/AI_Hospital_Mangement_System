@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stethoscope } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
@@ -85,7 +86,7 @@ function Profile() {
   return (
     <div className="profile-container">
 
-      <h1>👨‍⚕️ Doctor Profile</h1>
+      <h1><Stethoscope size={20} /> Doctor Profile</h1>
 
       <form className="profile-card" onSubmit={updateProfile}>
 

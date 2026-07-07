@@ -1,6 +1,184 @@
 import Navbar from "../../components/Navbar/Navbar";
+import BlurText from "../../components/BlurText";
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import {
+  Activity,
+  Ambulance,
+  Award,
+  Bot,
+  BrainCircuit,
+  Building2,
+  CalendarCheck2,
+  Clock3,
+  FileText,
+  HeartPulse,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Stethoscope,
+  Users,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Renderer, Program, Mesh, Triangle } from "ogl";
 import "./Home.css";
+
+const LiquidChrome = ({
+  baseColor = [0.1, 0.2, 0.6196078431372549],
+  speed = 1,
+  amplitude = 0.6,
+  frequencyX = 2.5,
+  frequencyY = 1.5,
+  interactive = true,
+  className = "",
+}) => {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const renderer = new Renderer({ antialias: true });
+    const gl = renderer.gl;
+    gl.clearColor(1, 1, 1, 1);
+
+    const vertexShader = `
+      attribute vec2 position;
+      attribute vec2 uv;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
+    const fragmentShader = `
+      precision highp float;
+      uniform float uTime;
+      uniform vec3 uResolution;
+      uniform vec3 uBaseColor;
+      uniform float uAmplitude;
+      uniform float uFrequencyX;
+      uniform float uFrequencyY;
+      uniform vec2 uMouse;
+      varying vec2 vUv;
+
+      vec4 renderImage(vec2 uvCoord) {
+          vec2 fragCoord = uvCoord * uResolution.xy;
+          vec2 uv = (2.0 * fragCoord - uResolution.xy) / min(uResolution.x, uResolution.y);
+
+          for (float i = 1.0; i < 10.0; i++){
+              uv.x += uAmplitude / i * cos(i * uFrequencyX * uv.y + uTime + uMouse.x * 3.14159);
+              uv.y += uAmplitude / i * cos(i * uFrequencyY * uv.x + uTime + uMouse.y * 3.14159);
+          }
+
+          vec2 diff = (uvCoord - uMouse);
+          float dist = length(diff);
+          float falloff = exp(-dist * 20.0);
+          float ripple = sin(10.0 * dist - uTime * 2.0) * 0.03;
+          uv += (diff / (dist + 0.0001)) * ripple * falloff;
+
+          vec3 color = uBaseColor / abs(sin(uTime - uv.y - uv.x));
+          return vec4(color, 1.0);
+      }
+
+      void main() {
+          vec4 col = vec4(0.0);
+          int samples = 0;
+          for (int i = -1; i <= 1; i++){
+              for (int j = -1; j <= 1; j++){
+                  vec2 offset = vec2(float(i), float(j)) * (1.0 / min(uResolution.x, uResolution.y));
+                  col += renderImage(vUv + offset);
+                  samples++;
+              }
+          }
+          gl_FragColor = col / float(samples);
+      }
+    `;
+
+    const geometry = new Triangle(gl);
+    const program = new Program(gl, {
+      vertex: vertexShader,
+      fragment: fragmentShader,
+      uniforms: {
+        uTime: { value: 0 },
+        uResolution: {
+          value: new Float32Array([gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height]),
+        },
+        uBaseColor: { value: new Float32Array(baseColor) },
+        uAmplitude: { value: amplitude },
+        uFrequencyX: { value: frequencyX },
+        uFrequencyY: { value: frequencyY },
+        uMouse: { value: new Float32Array([0, 0]) },
+      },
+    });
+    const mesh = new Mesh(gl, { geometry, program });
+
+    const resize = () => {
+      renderer.setSize(container.offsetWidth, container.offsetHeight);
+      const resUniform = program.uniforms.uResolution.value;
+      resUniform[0] = gl.canvas.width;
+      resUniform[1] = gl.canvas.height;
+      resUniform[2] = gl.canvas.width / gl.canvas.height;
+    };
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    const updateMouse = (x, y) => {
+      const mouseUniform = program.uniforms.uMouse.value;
+      mouseUniform[0] = x;
+      mouseUniform[1] = y;
+    };
+
+    const handleMouseMove = (event) => {
+      const rect = container.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = 1 - (event.clientY - rect.top) / rect.height;
+      updateMouse(x, y);
+    };
+
+    const handleTouchMove = (event) => {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        const rect = container.getBoundingClientRect();
+        const x = (touch.clientX - rect.left) / rect.width;
+        const y = 1 - (touch.clientY - rect.top) / rect.height;
+        updateMouse(x, y);
+      }
+    };
+
+    if (interactive) {
+      container.addEventListener("mousemove", handleMouseMove);
+      container.addEventListener("touchmove", handleTouchMove);
+    }
+
+    let animationId;
+    const update = (t) => {
+      animationId = requestAnimationFrame(update);
+      program.uniforms.uTime.value = t * 0.001 * speed;
+      renderer.render({ scene: mesh });
+    };
+    animationId = requestAnimationFrame(update);
+
+    container.appendChild(gl.canvas);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener("resize", resize);
+      if (interactive) {
+        container.removeEventListener("mousemove", handleMouseMove);
+        container.removeEventListener("touchmove", handleTouchMove);
+      }
+      if (gl.canvas.parentElement) {
+        gl.canvas.parentElement.removeChild(gl.canvas);
+      }
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    };
+  }, [baseColor, speed, amplitude, frequencyX, frequencyY, interactive]);
+
+  return <div ref={containerRef} className={`liquidChrome-container ${className}`.trim()} />;
+};
 
 function Home() {
   const navigate = useNavigate();
@@ -31,78 +209,98 @@ function Home() {
 
       {/* ================= HERO SECTION ================= */}
 
-      <section className="hero-section">
+      <motion.section
+        className="hero-section"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <LiquidChrome
+          className="liquid-chrome-bg"
+          baseColor={[0.05, 0.35, 0.95]}
+          speed={0.85}
+          amplitude={0.55}
+          frequencyX={2.6}
+          frequencyY={1.7}
+          interactive={true}
+        />
+        <div className="hero-backdrop" aria-hidden="true" />
 
-        <div className="hero-left">
+        <div className="hero-content">
+          <div className="hero-left">
 
-          <span className="hero-tag">
-             AI Powered Hospital Management System
-          </span>
+            <span className="hero-tag">
+              <Sparkles size={16} /> AI Powered Hospital Management System
+            </span>
 
-          <h1>
-            Your Health,
-            <br />
-            Our Intelligence.
-          </h1>
-
-          <p>
-            Experience the future of healthcare with Artificial Intelligence.
-            Instantly analyze symptoms, connect with verified doctors,
-            manage appointments, and access your medical records from
-            anywhere.
-          </p>
-
-          <div className="hero-buttons">
-
-            <button
-              className="primary-btn"
-              onClick={handleAppointment}
-            >
-              Book Appointment
-            </button>
-
-            <button
-              className="secondary-btn"
-              onClick={handleSymptomChecker}
-            >
-              AI Symptom Checker
-            </button>
-
-          </div>
-
-        </div>
-
-        <div className="hero-right">
-
-          <div className="doctor-card">
-
-            <div className="doctor-image">
-              👨‍⚕️
-            </div>
-
-            <h3>AI Healthcare Assistant</h3>
+            <h1>
+              Your Health,
+              <br />
+              Our Intelligence.
+            </h1>
 
             <p>
-              24/7 Intelligent Medical Support
+              Experience the future of healthcare with Artificial Intelligence.
+              Instantly analyze symptoms, connect with verified doctors,
+              manage appointments, and access your medical records from
+              anywhere.
             </p>
 
+            <div className="hero-buttons">
+
+              <button
+                className="primary-btn"
+                onClick={handleAppointment}
+              >
+                Book Appointment
+              </button>
+
+              <button
+                className="secondary-btn"
+                onClick={handleSymptomChecker}
+              >
+                AI Symptom Checker
+              </button>
+
+            </div>
+
           </div>
 
-          <div className="floating-card card-one">
-            ❤️ Heart Monitoring
-          </div>
+          <div className="hero-right">
 
-          <div className="floating-card card-two">
-            🤖 AI Diagnosis
-          </div>
+            <div className="doctor-card">
 
-          <div className="floating-card card-three">
-            🩺 100+ Doctors
-          </div>
+              <div className="doctor-image">
+                <Stethoscope size={96} strokeWidth={1.8} />
+              </div>
 
+              <h3>AI Healthcare Assistant</h3>
+
+              <p>
+                24/7 Intelligent Medical Support
+              </p>
+
+            </div>
+
+            <div className="floating-card card-one">
+              <span className="floating-icon"><HeartPulse size={16} /></span>
+              Heart Monitoring
+            </div>
+
+            <div className="floating-card card-two">
+              <span className="floating-icon"><Bot size={16} /></span>
+              AI Diagnosis
+            </div>
+
+            <div className="floating-card card-three">
+              <span className="floating-icon"><Users size={16} /></span>
+              100+ Doctors
+            </div>
+
+          </div>
         </div>
 
-      </section>
+      </motion.section>
 
       {/* ================= STATS ================= */}
 
@@ -185,67 +383,115 @@ function Home() {
       {/* ================= SERVICES ================= */}
        <section className="services-section">
 
-        <div className="section-header">
+        <motion.div
+          className="section-header"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <span className="section-tag">Our Healthcare Services</span>
           <h2>Everything You Need In One Platform</h2>
           <p>
             AI-powered healthcare with verified doctors, online appointments,
             digital medical records, and secure patient management.
           </p>
-        </div>
+        </motion.div>
 
         <div className="services-grid">
 
-          <div className="service-card">
-            <div className="service-icon">🤖</div>
+          <motion.div
+            className="service-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, delay: 0.05, ease: "easeOut" }}
+            whileHover={{ y: -10, scale: 1.01 }}
+          >
+            <div className="service-icon"><BrainCircuit size={32} /></div>
             <h3>AI Symptom Checker</h3>
             <p>
               Describe your symptoms and receive AI-powered disease prediction,
               precautions, and doctor recommendations.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="service-card">
-            <div className="service-icon">👨‍⚕️</div>
+          <motion.div
+            className="service-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, delay: 0.1, ease: "easeOut" }}
+            whileHover={{ y: -10, scale: 1.01 }}
+          >
+            <div className="service-icon"><Users size={32} /></div>
             <h3>Expert Doctors</h3>
             <p>
               Consult experienced doctors from multiple specialties with
               verified profiles.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="service-card">
-            <div className="service-icon">📅</div>
+          <motion.div
+            className="service-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
+            whileHover={{ y: -10, scale: 1.01 }}
+          >
+            <div className="service-icon"><CalendarCheck2 size={32} /></div>
             <h3>Easy Appointments</h3>
             <p>
               Book appointments online without waiting in long hospital queues.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="service-card">
-            <div className="service-icon">📄</div>
+          <motion.div
+            className="service-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, delay: 0.2, ease: "easeOut" }}
+            whileHover={{ y: -10, scale: 1.01 }}
+          >
+            <div className="service-icon"><FileText size={32} /></div>
             <h3>Medical Records</h3>
             <p>
               Store prescriptions, reports and previous consultations securely.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="service-card">
-            <div className="service-icon">🚑</div>
+          <motion.div
+            className="service-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, delay: 0.25, ease: "easeOut" }}
+            whileHover={{ y: -10, scale: 1.01 }}
+          >
+            <div className="service-icon"><Ambulance size={32} /></div>
             <h3>Emergency Support</h3>
             <p>
               Get quick access to emergency healthcare whenever you need it.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="service-card">
-            <div className="service-icon">🔒</div>
+          <motion.div
+            className="service-card"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, delay: 0.3, ease: "easeOut" }}
+            whileHover={{ y: -10, scale: 1.01 }}
+          >
+            <div className="service-icon"><ShieldCheck size={32} /></div>
             <h3>Secure Platform</h3>
             <p>
               Your healthcare data is encrypted and protected using modern
               security practices.
             </p>
-          </div>
+          </motion.div>
 
         </div>
 
@@ -257,33 +503,98 @@ function Home() {
 
         <div className="section-header">
           <span className="section-tag">Meet Our Specialists</span>
-          <h2>Featured Doctors</h2>
+          <h2 className="featured-doctors-heading">
+            <BlurText text="Featured Doctors" className="featured-doctors-title" />
+          </h2>
         </div>
 
         <div className="doctor-grid">
 
           <div className="doctor-profile">
-            <div className="doctor-avatar">👨‍⚕️</div>
+            <div className="doctor-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=800&q=80"
+                alt="Cardiologist portrait"
+              />
+            </div>
+            <div className="doctor-rating" aria-label="4.9 out of 5 stars">
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <span>4.9</span>
+            </div>
             <h3>Cardiologist</h3>
             <p>Heart Specialist</p>
+            <div className="doctor-badges">
+              <span className="doctor-badge">
+                <Award size={14} /> 15+ yrs
+              </span>
+              <span className="doctor-badge">
+                <Building2 size={14} /> CityCare Hospital
+              </span>
+            </div>
             <button onClick={handleAppointment}>
               Book Appointment
             </button>
           </div>
 
           <div className="doctor-profile">
-            <div className="doctor-avatar">👩‍⚕️</div>
+            <div className="doctor-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80"
+                alt="Neurologist portrait"
+              />
+            </div>
+            <div className="doctor-rating" aria-label="4.8 out of 5 stars">
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <span>4.8</span>
+            </div>
             <h3>Neurologist</h3>
             <p>Brain Specialist</p>
+            <div className="doctor-badges">
+              <span className="doctor-badge">
+                <Clock3 size={14} /> 12+ yrs
+              </span>
+              <span className="doctor-badge">
+                <Building2 size={14} /> Nova Brain Center
+              </span>
+            </div>
             <button onClick={handleAppointment}>
               Book Appointment
             </button>
           </div>
 
           <div className="doctor-profile">
-            <div className="doctor-avatar">🧑‍⚕️</div>
+            <div className="doctor-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=800&q=80"
+                alt="Dermatologist portrait"
+              />
+            </div>
+            <div className="doctor-rating" aria-label="4.7 out of 5 stars">
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <Star size={15} fill="#fbbf24" color="#fbbf24" />
+              <span>4.7</span>
+            </div>
             <h3>Dermatologist</h3>
             <p>Skin Specialist</p>
+            <div className="doctor-badges">
+              <span className="doctor-badge">
+                <Award size={14} /> 10+ yrs
+              </span>
+              <span className="doctor-badge">
+                <Building2 size={14} /> SkinCare Institute
+              </span>
+            </div>
             <button onClick={handleAppointment}>
               Book Appointment
             </button>
@@ -400,7 +711,7 @@ function Home() {
 
         <div>
 
-          <h3>🏥 AI Hospital</h3>
+          <h3><Building2 size={20} /> AI Hospital</h3>
 
           <p>
             Smart Healthcare Powered by Artificial Intelligence.

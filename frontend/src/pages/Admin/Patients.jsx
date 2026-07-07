@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trash2, User, Users } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
@@ -106,7 +107,7 @@ function Patients() {
 
     <div className="patients-container">
 
-      <h1>🧑‍🤝‍🧑 Manage Patients</h1>
+      <h1><Users size={20} /> Manage Patients</h1>
 
       <input
         type="text"
@@ -138,7 +139,7 @@ function Patients() {
             >
 
               <h2>
-                👤 {patient.name}
+                <User size={18} /> {patient.name}
               </h2>
 
               <p>
@@ -172,7 +173,7 @@ function Patients() {
                   deletePatient(patient._id)
                 }
               >
-                🗑 Delete Patient
+                <Trash2 size={16} /> Delete Patient
               </button>
 
             </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CalendarDays } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -158,7 +159,7 @@ function Appointment() {
 
       <div className="appointment-card">
 
-        <h1>📅 Book Appointment</h1>
+        <h1><CalendarDays size={20} /> Book Appointment</h1>
 
         <form onSubmit={handleSubmit}>
 

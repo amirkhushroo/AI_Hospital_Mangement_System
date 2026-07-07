@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CalendarDays, Stethoscope } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./MyAppointments.css";
@@ -72,7 +73,7 @@ function MyAppointments() {
   return (
     <div className="appointments-container">
 
-      <h1>📅 My Appointments</h1>
+      <h1><CalendarDays size={20} /> My Appointments</h1>
 
      {Array.isArray(appointments) && appointments.length === 0 ? (
 
@@ -91,7 +92,7 @@ appointments.map((appointment) => (
           >
 
             <h3>
-  👨‍⚕️ Dr. {appointment.doctor?.name || "Doctor Not Assigned"}
+  <Stethoscope size={18} /> Dr. {appointment.doctor?.name || "Doctor Not Assigned"}
 </h3>
 
             <p>
