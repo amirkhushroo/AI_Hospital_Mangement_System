@@ -293,11 +293,6 @@ function Home() {
               AI Diagnosis
             </div>
 
-            <div className="floating-card card-three">
-              <span className="floating-icon"><Users size={16} /></span>
-              100+ Doctors
-            </div>
-
           </div>
         </div>
 
@@ -621,42 +616,208 @@ function Home() {
 
       {/* ================= HOW IT WORKS ================= */}
 
-      <section className="steps-section">
+      <section
+  className="steps-section"
+  style={{
+    opacity: 1,
+    visibility: "visible",
+    background: "#f8fbff",
+    padding: "100px 20px",
+  }}
+>
+  <div
+    className="section-header"
+    style={{
+      opacity: 1,
+      visibility: "visible",
+      textAlign: "center",
+    }}
+  >
+    <span
+      className="section-tag"
+      style={{
+        opacity: 1,
+        color: "#2563eb",
+        fontWeight: "600",
+      }}
+    >
+      Simple Process
+    </span>
 
-        <div className="section-header">
-          <span className="section-tag">Simple Process</span>
-          <h2>How It Works</h2>
-        </div>
+    <h2
+      style={{
+        opacity: 1,
+        color: "#111827",
+        fontWeight: "800",
+      }}
+    >
+      How It Works
+    </h2>
+  </div>
 
-        <div className="steps-grid">
+  <div
+    className="steps-grid"
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(4,1fr)",
+      gap: "30px",
+      maxWidth: "1200px",
+      margin: "50px auto 0",
+      opacity: 1,
+    }}
+  >
+    <div
+      className="step-card"
+      style={{
+        background: "#fff",
+        padding: "35px 25px",
+        borderRadius: "20px",
+        textAlign: "center",
+        boxShadow: "0 12px 30px rgba(0,0,0,.12)",
+        opacity: 1,
+      }}
+    >
+      <span
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "70px",
+          height: "70px",
+          margin: "0 auto 20px",
+          borderRadius: "50%",
+          background: "#2563eb",
+          color: "#fff",
+          fontSize: "28px",
+          fontWeight: "700",
+          opacity: 1,
+        }}
+      >
+        1
+      </span>
 
-          <div className="step-card">
-            <span>1</span>
-            <h3>Describe Symptoms</h3>
-            <p>Enter your symptoms using natural language.</p>
-          </div>
+      <h3 style={{ color: "#111827", opacity: 1 }}>
+        Describe Symptoms
+      </h3>
 
-          <div className="step-card">
-            <span>2</span>
-            <h3>AI Analysis</h3>
-            <p>Our AI analyzes possible diseases and precautions.</p>
-          </div>
+      <p style={{ color: "#4b5563", opacity: 1 }}>
+        Enter your symptoms using natural language.
+      </p>
+    </div>
 
-          <div className="step-card">
-            <span>3</span>
-            <h3>Choose Doctor</h3>
-            <p>Select the most suitable specialist.</p>
-          </div>
+    <div
+      className="step-card"
+      style={{
+        background: "#fff",
+        padding: "35px 25px",
+        borderRadius: "20px",
+        textAlign: "center",
+        boxShadow: "0 12px 30px rgba(0,0,0,.12)",
+        opacity: 1,
+      }}
+    >
+      <span
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "70px",
+          height: "70px",
+          margin: "0 auto 20px",
+          borderRadius: "50%",
+          background: "#2563eb",
+          color: "#fff",
+          fontSize: "28px",
+          fontWeight: "700",
+        }}
+      >
+        2
+      </span>
 
-          <div className="step-card">
-            <span>4</span>
-            <h3>Book Appointment</h3>
-            <p>Confirm your appointment in seconds.</p>
-          </div>
+      <h3 style={{ color: "#111827" }}>
+        AI Analysis
+      </h3>
 
-        </div>
+      <p style={{ color: "#4b5563" }}>
+        Our AI analyzes possible diseases and precautions.
+      </p>
+    </div>
 
-      </section>
+    <div
+      className="step-card"
+      style={{
+        background: "#fff",
+        padding: "35px 25px",
+        borderRadius: "20px",
+        textAlign: "center",
+        boxShadow: "0 12px 30px rgba(0,0,0,.12)",
+      }}
+    >
+      <span
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "70px",
+          height: "70px",
+          margin: "0 auto 20px",
+          borderRadius: "50%",
+          background: "#2563eb",
+          color: "#fff",
+          fontSize: "28px",
+          fontWeight: "700",
+        }}
+      >
+        3
+      </span>
+
+      <h3 style={{ color: "#111827" }}>
+        Choose Doctor
+      </h3>
+
+      <p style={{ color: "#4b5563" }}>
+        Select the most suitable specialist.
+      </p>
+    </div>
+
+    <div
+      className="step-card"
+      style={{
+        background: "#fff",
+        padding: "35px 25px",
+        borderRadius: "20px",
+        textAlign: "center",
+        boxShadow: "0 12px 30px rgba(0,0,0,.12)",
+      }}
+    >
+      <span
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "70px",
+          height: "70px",
+          margin: "0 auto 20px",
+          borderRadius: "50%",
+          background: "#2563eb",
+          color: "#fff",
+          fontSize: "28px",
+          fontWeight: "700",
+        }}
+      >
+        4
+      </span>
+
+      <h3 style={{ color: "#111827" }}>
+        Book Appointment
+      </h3>
+
+      <p style={{ color: "#4b5563" }}>
+        Confirm your appointment in seconds.
+      </p>
+    </div>
+  </div>
+</section>
 
       {/* ================= TESTIMONIALS ================= */}
 
@@ -726,7 +887,7 @@ function Home() {
 
         <div>
 
-          <h3><Building2 size={20} /> AI Hospital</h3>
+          <h3><Building2 size={20} /> MED-Connect Hospital</h3>
 
           <p>
             Smart Healthcare Powered by Artificial Intelligence.
@@ -765,7 +926,7 @@ function Home() {
 
           <h4>Contact</h4>
 
-          <p>support@aihospital.com</p>
+          <p>support@medconnect.com</p>
           <p>+91 98765 43210</p>
 
         </div>

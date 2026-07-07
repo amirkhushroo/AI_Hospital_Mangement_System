@@ -37,8 +37,8 @@ function Navbar() {
           transition={{ type: "spring", stiffness: 260, damping: 16 }}
         />
         <span className="logo-text">
-          <span className="logo-word">MEDI-CONNECT</span>
-          <span className="logo-accent">AI</span>
+          <span className="logo-word">MED-CONNECT</span>
+          <span className="logo-accent">HOSPITAL</span>
         </span>
       </Link>
 

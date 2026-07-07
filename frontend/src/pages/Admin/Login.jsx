@@ -44,7 +44,7 @@ function Login() {
 
       <div className="login-card">
 
-        <h1><Building2 size={20} /> AI Hospital</h1>
+        <h1><Building2 size={20} /> MED-Connect Hospital</h1>
         <h2>Admin Login</h2>
 
         <form onSubmit={handleLogin}>

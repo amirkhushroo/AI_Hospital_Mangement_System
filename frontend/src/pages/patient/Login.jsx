@@ -48,7 +48,7 @@ function Login() {
     <div className="login-container">
       <div className="login-card">
 
-        <h1><Building2 size={20} /> AI Hospital</h1>
+        <h1><Building2 size={20} /> MED-Connect Hospital</h1>
 
         <h2>Patient Login</h2>
 

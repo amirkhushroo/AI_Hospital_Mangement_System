@@ -1799,12 +1799,13 @@ overflow:hidden;
   line-height: 1.08;
   letter-spacing: -0.03em;
   margin-bottom: 20px;
+  color: #ffffff;
 }
 
 .hero-left p {
   font-size: 1.02rem;
   line-height: 1.95;
-  color: #475569;
+  color: rgba(255,255,255,0.92);
 }
 
 .primary-btn,
@@ -1985,4 +1986,31 @@ overflow:hidden;
     padding: 14px 20px;
     font-size: 15px;
   }
+}
+
+/* ===== FIX FADED TEXT ===== */
+
+.service-card h3,
+.service-card p,
+.step-card h3,
+.step-card p,
+.testimonial-card h4,
+.testimonial-card p {
+    color: #111827 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+.service-card,
+.step-card,
+.testimonial-card {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.service-icon,
+.step-card span {
+    opacity: 1 !important;
 }
