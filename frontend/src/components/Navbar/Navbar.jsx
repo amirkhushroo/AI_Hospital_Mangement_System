@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
+import logo from "../../assets/logo1.png";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -19,8 +20,9 @@ function Navbar() {
   return (
     <nav className="navbar">
       <Link className="logo" to="/">
-        🏥 AI Hospital
-      </Link>
+  <img src={logo} alt="MEDI-CONNECT AI" className="logo-img" />
+  <span>MEDI-CONNECT AI</span>
+</Link>
 
       <ul className="nav-links">
         <li><Link to="/">Home</Link></li>
