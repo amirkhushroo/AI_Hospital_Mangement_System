@@ -2,6 +2,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import BlurText from "../../components/BlurText";
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import hospitalBg from "../../assets/about-bg.jpg";
 import {
   Activity,
   Ambulance,
@@ -210,10 +211,10 @@ function Home() {
       {/* ================= HERO SECTION ================= */}
 
       <motion.section
-        className="hero-section"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+         className="hero-section"
+  initial={{ opacity: 0, y: 24 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <LiquidChrome
           className="liquid-chrome-bg"
@@ -303,6 +304,20 @@ function Home() {
       </motion.section>
 
       {/* ================= STATS ================= */}
+
+      <section className="hospital-section">
+
+  <div className="hospital-image-container">
+
+    <img
+      src={hospitalBg}
+      alt="MED Connect Hospital"
+      className="hospital-image"
+    />
+
+  </div>
+
+</section>
 
       <section className="stats-section">
 
@@ -720,15 +735,31 @@ function Home() {
         </div>
 
         <div>
+  <h4>Quick Links</h4>
 
-          <h4>Quick Links</h4>
+  <p
+    style={{ cursor: "pointer" }}
+    onClick={() => navigate("/")}
+  >
+    Home
+  </p>
 
-          <p>Home</p>
-          <p>About</p>
-          <p>Doctors</p>
-          <p>Appointments</p>
+  <p
+    style={{ cursor: "pointer" }}
+    onClick={() => navigate("/about")}
+  >
+    About
+  </p>
 
-        </div>
+  
+
+  <p
+    style={{ cursor: "pointer" }}
+    onClick={handleAppointment}
+  >
+    Appointments
+  </p>
+</div>
 
         <div>
 

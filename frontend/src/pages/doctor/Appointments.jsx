@@ -28,6 +28,7 @@ function Appointments() {
           },
         }
       );
+      console.log("Doctor Appointments Response:", response.data);
 
       if (response.data.success) {
         setAppointments(response.data.appointments);
@@ -103,18 +104,17 @@ function Appointments() {
               key={app._id}
             >
 
-              <h3>
-                <User size={18} /> {app.patient.name}
-              </h3>
+             <h3>
+  <User size={18} /> {app.patient?.name || "Unknown Patient"}
+</h3>
 
-              <p>
-                <b>Email :</b> {app.patient.email}
-              </p>
+<p>
+  <b>Email :</b> {app.patient?.email || "N/A"}
+</p>
 
-              <p>
-                <b>Phone :</b> {app.patient.phone}
-              </p>
-
+<p>
+  <b>Phone :</b> {app.patient?.phone || "N/A"}
+</p>
               <p>
                 <b>Date :</b>{" "}
                 {

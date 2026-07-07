@@ -5,7 +5,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #e9f4ff 0%, #f7fbff 100%);
+    background: linear-gradient(135deg, #bbd5f0 0%, #b8d3ee 100%);
     padding: 24px;
 }
 
@@ -44,13 +44,13 @@
 .login-card input {
     width: 100%;
     padding: 14px 15px;
-    border: 1px solid #d8e3ef;
+    border: 1px solid #aacaec;
     border-radius: 12px;
     font-size: 1rem;
     outline: none;
     transition: 0.2s ease;
     box-sizing: border-box;
-    background: #fbfdff;
+    background: #b3d0ee;
 }
 
 .login-card input:focus {
@@ -66,7 +66,7 @@
     border: none;
     border-radius: 999px;
     background: linear-gradient(135deg, #1976d2, #4f8ef7);
-    color: white;
+    color: rgb(164, 187, 236);
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;

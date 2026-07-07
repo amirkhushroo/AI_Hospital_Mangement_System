@@ -31,6 +31,7 @@ function Patients() {
         }
       );
 
+
       if (response.data.success) {
 
         setPatients(response.data.appointments);
@@ -56,14 +57,13 @@ function Patients() {
 
     setSearch(value);
 
-    const filtered = patients.filter((item) =>
-
-      item.patient.name
-        .toLowerCase()
-        .includes(value.toLowerCase())
-
-    );
-
+    const filtered = patients.filter(
+  (item) =>
+    item.patient &&
+    item.patient.name
+      .toLowerCase()
+      .includes(value.toLowerCase())
+);
     setFilteredPatients(filtered);
 
   };
@@ -99,32 +99,32 @@ function Patients() {
             >
 
               <h2>
-                <User size={18} /> {item.patient.name}
+                <User size={18} /> {item.patient?.name || "Unknown Patient"}
               </h2>
 
               <p>
                 <strong>Email :</strong>{" "}
-                {item.patient.email}
+                {item.patient?.email || "N/A"}
               </p>
 
               <p>
                 <strong>Phone :</strong>{" "}
-                {item.patient.phone}
+                {item.patient?.phone || "N/A"}
               </p>
 
               <p>
                 <strong>Age :</strong>{" "}
-                {item.patient.age}
+                {item.patient?.age || "N/A"}
               </p>
 
               <p>
                 <strong>Gender :</strong>{" "}
-                {item.patient.gender}
+                {item.patient?.gender || "N/A"}
               </p>
 
               <p>
                 <strong>Address :</strong>{" "}
-                {item.patient.address}
+                {item.patient?.address || "N/A"}
               </p>
 
               <p>
