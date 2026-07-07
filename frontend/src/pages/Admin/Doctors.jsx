@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stethoscope, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Doctors.css";
@@ -110,7 +111,7 @@ function Doctors() {
 
     <div className="doctors-container">
 
-      <h1>👨‍⚕️ Manage Doctors</h1>
+      <h1><Stethoscope size={20} /> Manage Doctors</h1>
 
       <input
         type="text"
@@ -142,7 +143,7 @@ function Doctors() {
             >
 
               <h2>
-                👨‍⚕️ {doctor.name}
+                <Stethoscope size={18} /> {doctor.name}
               </h2>
 
               <p>
@@ -186,7 +187,7 @@ function Doctors() {
                   deleteDoctor(doctor._id)
                 }
               >
-                🗑 Delete Doctor
+                <Trash2 size={16} /> Delete Doctor
               </button>
 
             </div>

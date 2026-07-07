@@ -1,3 +1,4 @@
+import { Ambulance, Brain, Building2, CalendarDays, FileText, Stethoscope } from "lucide-react";
 import "./About.css";
 
 function About() {
@@ -30,7 +31,7 @@ function About() {
 
       <section className="hero">
 
-        <h1>🏥 AI Powered Hospital Management System</h1>
+        <h1><Building2 size={20} /> AI Powered Hospital Management System</h1>
 
         <p>
           Book appointments, consult expert doctors, analyze symptoms
@@ -60,25 +61,25 @@ function About() {
         <div className="service-grid">
 
           <div className="service-card">
-            🤖
+            <Brain size={28} />
             <h3>AI Symptom Checker</h3>
             <p>Analyze your symptoms using AI.</p>
           </div>
 
           <div className="service-card">
-            📅
+            <CalendarDays size={28} />
             <h3>Appointment Booking</h3>
             <p>Book appointments online.</p>
           </div>
 
           <div className="service-card">
-            👨‍⚕️
+            <Stethoscope size={28} />
             <h3>Expert Doctors</h3>
             <p>Consult experienced specialists.</p>
           </div>
 
           <div className="service-card">
-            📄
+            <FileText size={28} />
             <h3>Medical Records</h3>
             <p>Access reports anytime.</p>
           </div>
@@ -120,12 +121,12 @@ function About() {
         <h2>Why Choose Us?</h2>
 
         <ul>
-          <li>✅ AI Based Diagnosis</li>
-          <li>✅ Easy Appointment Booking</li>
-          <li>✅ Expert Doctors</li>
-          <li>✅ Secure Medical Records</li>
-          <li>✅ Modern Healthcare</li>
-          <li>✅ 24×7 Support</li>
+          <li><Brain size={16} /> AI Based Diagnosis</li>
+          <li><CalendarDays size={16} /> Easy Appointment Booking</li>
+          <li><Stethoscope size={16} /> Expert Doctors</li>
+          <li><FileText size={16} /> Secure Medical Records</li>
+          <li><Building2 size={16} /> Modern Healthcare</li>
+          <li><Ambulance size={16} /> 24×7 Support</li>
         </ul>
 
       </section>

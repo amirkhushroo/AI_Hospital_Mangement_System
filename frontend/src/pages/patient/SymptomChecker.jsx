@@ -1,8 +1,38 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { Bot, Sparkles, ShieldAlert, Stethoscope } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./SymptomChecker.css";
+
+function SplitText({ text, className = "", delay = 35, duration = 0.7 }) {
+  const words = text.split(" ");
+
+  return (
+    <span className={`split-text ${className}`} aria-label={text}>
+      {words.map((word, wordIndex) => (
+        <span key={`${word}-${wordIndex}`} className="split-word">
+          {word.split("").map((char, charIndex) => (
+            <motion.span
+              key={`${word}-${charIndex}`}
+              className="split-char"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: wordIndex * 0.05 + charIndex * 0.03 + delay / 1000,
+                duration,
+              }}
+            >
+              {char}
+            </motion.span>
+          ))}
+          {wordIndex < words.length - 1 ? <span className="split-space">&nbsp;</span> : null}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 function SymptomChecker() {
 
@@ -65,26 +95,47 @@ function SymptomChecker() {
 
   return (
 
-    <div className="symptom-container">
+    <motion.div
+      className="symptom-container"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
 
-      <h1>🤖 AI Symptom Checker</h1>
+      <h1>
+        <span className="symptom-icon" aria-hidden="true">
+          <Bot size={24} />
+        </span>
+        <SplitText text="AI Symptom Checker" className="symptom-title-text" />
+      </h1>
 
       <textarea
+        className="symptom-textarea"
         placeholder="Describe your symptoms..."
         value={symptoms}
         onChange={(e) => setSymptoms(e.target.value)}
       />
 
-      <button
+      <motion.button
+        className="symptom-button"
         onClick={handleCheckSymptoms}
         disabled={loading}
+        whileHover={{ scale: 1.02, y: -2 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 280, damping: 20 }}
       >
+        <Sparkles size={18} />
         {loading ? "Analyzing..." : "Analyze Symptoms"}
-      </button>
+      </motion.button>
 
       {result && (
 
-        <div className="result-card">
+        <motion.div
+          className="result-card"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
 
           <h2>Analysis Result</h2>
 
@@ -107,7 +158,7 @@ function SymptomChecker() {
             <strong>Recommended Doctor :</strong>{" "}
             {result.result.recommendedDoctor}
           </p>
-                    <p>
+          <p>
             <strong>Medicines :</strong>{" "}
             {result.result.medicines?.length
               ? result.result.medicines.join(", ")
@@ -146,7 +197,9 @@ function SymptomChecker() {
 
             <div className="emergency-box">
 
-              <h3>🚨 Emergency Alert</h3>
+              <h3>
+                <ShieldAlert size={18} /> Emergency Alert
+              </h3>
 
               <p>
                 {result.result.emergencyMessage}
@@ -167,7 +220,10 @@ function SymptomChecker() {
                 className="doctor-card"
               >
 
-                <h3>{doctor.name}</h3>
+                <h3>
+                  <Stethoscope size={18} />
+                  {doctor.name}
+                </h3>
 
                 <p>
                   <strong>Specialization :</strong>{" "}
@@ -205,13 +261,16 @@ function SymptomChecker() {
                   {doctor.availableTime?.end}
                 </p>
 
-                <button
+                <motion.button
+                  className="doctor-book-btn"
                   onClick={() =>
                     navigate("/patient/appointment")
                   }
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Book Appointment
-                </button>
+                </motion.button>
 
               </div>
 
@@ -223,11 +282,11 @@ function SymptomChecker() {
 
           )}
 
-        </div>
+        </motion.div>
 
       )}
 
-    </div>
+    </motion.div>
 
   );
 

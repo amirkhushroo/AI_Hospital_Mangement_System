@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -65,7 +66,7 @@ function Login() {
 
       <div className="login-card">
 
-        <h1>🏥 AI Hospital</h1>
+        <h1><Building2 size={20} /> AI Hospital</h1>
 
         <h2>Doctor Login</h2>
 

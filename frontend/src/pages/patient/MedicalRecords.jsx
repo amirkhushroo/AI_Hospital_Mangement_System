@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import "./MedicalRecords.css";
 
 function MedicalRecords() {
@@ -24,7 +25,7 @@ function MedicalRecords() {
   return (
     <div className="medical-container">
 
-      <h1>📄 Medical Records</h1>
+      <h1><FileText size={20} /> Medical Records</h1>
 
       {records.length === 0 ? (
 

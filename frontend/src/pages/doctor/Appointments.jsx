@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check, CircleX, CalendarDays, User } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
@@ -86,7 +87,7 @@ function Appointments() {
 
     <div className="appointments-container">
 
-      <h1>📅 Doctor Appointments</h1>
+      <h1><CalendarDays size={20} /> Doctor Appointments</h1>
 
       {
         appointments.length === 0 ?
@@ -103,7 +104,7 @@ function Appointments() {
             >
 
               <h3>
-                👤 {app.patient.name}
+                <User size={18} /> {app.patient.name}
               </h3>
 
               <p>
@@ -172,7 +173,7 @@ function Appointments() {
                         updateStatus(app._id, "Accepted")
                       }
                     >
-                      ✅ Accept
+                      <Check size={16} /> Accept
                     </button>
 
                     <button
@@ -181,7 +182,7 @@ function Appointments() {
                         updateStatus(app._id, "Rejected")
                       }
                     >
-                      ❌ Reject
+                      <CircleX size={16} /> Reject
                     </button>
                   </>
                 )}
@@ -193,7 +194,7 @@ function Appointments() {
                       updateStatus(app._id, "Completed")
                     }
                   >
-                    ✔ Complete
+                    <Check size={16} /> Complete
                   </button>
                 )}
 
@@ -202,7 +203,7 @@ function Appointments() {
                     disabled
                     className="reject-btn"
                   >
-                    ❌ Rejected
+                    <CircleX size={16} /> Rejected
                   </button>
                 )}
 
@@ -211,7 +212,7 @@ function Appointments() {
                     disabled
                     className="complete-btn"
                   >
-                    ✔ Completed
+                    <Check size={16} /> Completed
                   </button>
                 )}
 

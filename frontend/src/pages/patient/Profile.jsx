@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { User } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
@@ -97,10 +98,10 @@ function Profile() {
 
       <div className="profile-card">
 
-        <h1>👤 My Profile</h1>
+        <h1><User size={20} /> My Profile</h1>
 
         <div className="profile-image">
-          👨
+          <User size={28} />
         </div>
 
         <div className="profile-form">

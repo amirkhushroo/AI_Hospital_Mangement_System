@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CalendarDays, User } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
@@ -103,7 +104,7 @@ function Appointments() {
 
     <div className="appointments-container">
 
-      <h1>📅 Manage Appointments</h1>
+      <h1><CalendarDays size={20} /> Manage Appointments</h1>
 
       <div className="filter-section">
 
@@ -152,7 +153,7 @@ function Appointments() {
             >
 
               <h2>
-                👤 {appointment.patient?.name}
+                <User size={18} /> {appointment.patient?.name}
               </h2>
 
               <p>

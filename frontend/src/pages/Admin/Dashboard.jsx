@@ -1,6 +1,7 @@
 import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Brain, Building2, CalendarDays, Hand, Stethoscope, Users } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 
@@ -70,7 +71,7 @@ function Dashboard() {
 
       <header className="dashboard-header">
 
-        <h1>🏥 AI Hospital Admin</h1>
+        <h1><Building2 size={20} /> AI Hospital Admin</h1>
 
         <button
           className="logout-btn"
@@ -86,7 +87,7 @@ function Dashboard() {
       <div className="welcome-section">
 
         <h2>
-          Welcome Admin {admin?.name || ""} 👋
+          Welcome Admin {admin?.name || ""} <Hand size={18} />
         </h2>
 
         <p>
@@ -106,7 +107,7 @@ function Dashboard() {
           onClick={() => navigate("/admin/doctors")}
           style={{ cursor: "pointer" }}
         >
-          <h3>👨‍⚕️ Doctors</h3>
+          <h3><Stethoscope size={18} /> Doctors</h3>
 
           <h2>{dashboard.totalDoctors}</h2>
 
@@ -121,7 +122,7 @@ function Dashboard() {
           onClick={() => navigate("/admin/patients")}
           style={{ cursor: "pointer" }}
         >
-          <h3>🧑‍🤝‍🧑 Patients</h3>
+          <h3><Users size={18} /> Patients</h3>
 
           <h2>{dashboard.totalPatients}</h2>
 
@@ -136,7 +137,7 @@ function Dashboard() {
           onClick={() => navigate("/admin/appointments")}
           style={{ cursor: "pointer" }}
         >
-          <h3>📅 Appointments</h3>
+          <h3><CalendarDays size={18} /> Appointments</h3>
 
           <h2>{dashboard.totalAppointments}</h2>
 
@@ -151,7 +152,7 @@ function Dashboard() {
           onClick={() => navigate("/admin/reports")}
           style={{ cursor: "pointer" }}
         >
-          <h3>🤖 AI Reports</h3>
+          <h3><Brain size={18} /> AI Reports</h3>
 
           <h2>{dashboard.totalAIReports}</h2>
 
