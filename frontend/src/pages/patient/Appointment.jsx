@@ -180,7 +180,7 @@ function Appointment() {
                 key={doctor._id}
                 value={doctor._id}
               >
-                Dr. {doctor.name} - {doctor.specialization}
+                 {doctor.name} - {doctor.specialization}
               </option>
 
             ))}
@@ -253,6 +253,7 @@ function Appointment() {
             name="appointmentTime"
             value={formData.appointmentTime}
             onChange={handleChange}
+           
           />
 
           {/* ================= Symptoms ================= */}

@@ -71,7 +71,7 @@ function Dashboard() {
 
       <header className="dashboard-header">
 
-        <h1><Building2 size={20} /> AI Hospital Admin</h1>
+        <h1><Building2 size={20} /> MED-Connect Admin</h1>
 
         <button
           className="logout-btn"
@@ -87,7 +87,7 @@ function Dashboard() {
       <div className="welcome-section">
 
         <h2>
-          Welcome Admin {admin?.name || ""} <Hand size={18} />
+          Welcome  {admin?.name || ""} <Hand size={18} />
         </h2>
 
         <p>

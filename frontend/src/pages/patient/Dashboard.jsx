@@ -23,7 +23,7 @@ function Dashboard() {
       {/* ================= HEADER ================= */}
 
       <header className="dashboard-header">
-        <h1><Building2 size={20} /> AI Hospital</h1>
+        <h1><Building2 size={20} /> MED-Connect</h1>
 
         <button
           className="logout-btn"
