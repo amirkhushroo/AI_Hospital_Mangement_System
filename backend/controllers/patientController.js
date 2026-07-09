@@ -77,10 +77,16 @@ const registerPatient = async (req, res) => {
 };
 
 // ====================== LOGIN PATIENT ======================
+// ====================== LOGIN PATIENT ======================
 
 const loginPatient = async (req, res) => {
   try {
+    console.log("========== LOGIN REQUEST ==========");
+    console.log("Request Body:", req.body);
+
     let { email, password } = req.body;
+
+    console.log("Email:", email);
 
     // Validate Required Fields
     if (!email || !password) {
@@ -93,7 +99,10 @@ const loginPatient = async (req, res) => {
     // Normalize Email
     email = email.trim().toLowerCase();
 
+    // Find Patient
     const patient = await Patient.findOne({ email });
+
+    console.log("Patient Found:", patient);
 
     if (!patient) {
       return res.status(404).json({
@@ -104,6 +113,8 @@ const loginPatient = async (req, res) => {
 
     // Compare Password
     const isMatch = await bcrypt.compare(password, patient.password);
+
+    console.log("Password Match:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -135,7 +146,8 @@ const loginPatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    console.error("========== LOGIN ERROR ==========");
+    console.error(error);
 
     res.status(500).json({
       success: false,

@@ -23,7 +23,6 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow Postman and server-to-server requests
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -36,6 +35,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ⭐⭐⭐ ADD THIS LINE ⭐⭐⭐
+app.use(express.json());
 // ====================== MongoDB Connection ======================
 
 mongoose

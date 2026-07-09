@@ -60,7 +60,7 @@ const createAdmin = async (req, res) => {
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+ console.log("Admin Login Attempt:", email);
     if (!email || !password) {
       return res.status(400).json({
         success: false,
