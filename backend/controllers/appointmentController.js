@@ -1,5 +1,5 @@
 const Appointment = require("../models/Appointment");
-const Patient = require("../models/Patient");
+const Patient = require("../models/patient");
 const Doctor = require("../models/Doctor");
 
 // ====================== BOOK APPOINTMENT ======================
