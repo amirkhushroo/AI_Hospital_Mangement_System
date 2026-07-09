@@ -15,18 +15,29 @@ const app = express();
 
 // ====================== Middleware ======================
 
+const cors = require("cors");
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ai-hospital-mangement-system.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "https://ai-hospital-management-system.vercel.app",
-      "http://localhost:5173",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    origin: function (origin, callback) {
+      // Allow Postman and server-to-server requests
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(express.json());
-
 // ====================== MongoDB Connection ======================
 
 mongoose
