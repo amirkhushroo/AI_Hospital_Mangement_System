@@ -4,6 +4,7 @@
 A full-stack AI-powered Hospital Management System built using the **MERN Stack (MongoDB, Express.js, React.js, Node.js)**. 
 The system provides separate portals for **Patients, Doctors, and Admin**, along with an **AI Symptom Checker** that helps patients understand possible diseases based on their symptoms.
 
+ WEBSITE LINK ~https://ai-hospital-mangement-system.vercel.app/
 ---
 
 # 📌 Features
@@ -300,14 +301,14 @@ This project was developed collaboratively by:
 
 | Team Member | Module |
 |--------------------------|-------------------------------------|
-| **Mohammad Amaan**       | Patient Module & AI Symptom Checker |
+| **Mohammad Amaan**       | Patient Module  |
 | **Bilal Ahmad Mansoori** | Doctor Module |
 | **Amir Khushroo**        | Admin Module |
 | **Falak Anwar**          | Appointment Module |
 | **Muhammad Arshad**      | UI & Documentation |
-
+| **Moh Avish**            | AI Symptom Checker |
 ---
-
+ 
 # 📄 License
 
 This project is developed for educational and learning purposes.
