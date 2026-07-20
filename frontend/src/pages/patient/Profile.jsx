@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
@@ -90,11 +91,20 @@ function Profile() {
   };
 
   if (loading) {
-    return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+    return (
+      <div style={{ padding: "20px" }}>
+        <BackButton />
+        <h2 style={{ textAlign: "center" }}>Loading...</h2>
+      </div>
+    );
   }
 
   return (
     <div className="profile-page">
+
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
 
       <div className="profile-card">
 

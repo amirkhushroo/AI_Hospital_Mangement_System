@@ -1,3 +1,4 @@
+import BackButton from "../../components/BackButton";
 import "./Dashboard.css";
 import { Building2, CalendarDays, Hand, Stethoscope, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,12 @@ function Dashboard() {
         </button>
 
       </header>
+
+      {/* ================= BACK BUTTON ================= */}
+
+      <div style={{ padding: "20px" }}>
+        <BackButton />
+      </div>
 
       {/* ================= WELCOME ================= */}
 

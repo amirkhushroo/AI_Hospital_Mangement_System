@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, Stethoscope } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./MyAppointments.css";
@@ -65,6 +66,7 @@ function MyAppointments() {
   if (loading) {
     return (
       <div className="appointments-container">
+        <BackButton />
         <h2>Loading...</h2>
       </div>
     );
@@ -73,9 +75,13 @@ function MyAppointments() {
   return (
     <div className="appointments-container">
 
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
+
       <h1><CalendarDays size={20} /> My Appointments</h1>
 
-     {Array.isArray(appointments) && appointments.length === 0 ? (
+      {Array.isArray(appointments) && appointments.length === 0 ? (
 
         <div className="no-appointments">
           <h3>No Appointments Found</h3>
@@ -84,7 +90,7 @@ function MyAppointments() {
       ) : (
 
         Array.isArray(appointments) &&
-appointments.map((appointment) => (
+        appointments.map((appointment) => (
 
           <div
             className="appointment-card"
@@ -92,12 +98,12 @@ appointments.map((appointment) => (
           >
 
             <h3>
-  <Stethoscope size={18} /> Dr. {appointment.doctor?.name || "Doctor Not Assigned"}
-</h3>
+              <Stethoscope size={18} /> Dr. {appointment.doctor?.name || "Doctor Not Assigned"}
+            </h3>
 
             <p>
               <strong>Specialization:</strong>{" "}
-             {appointment.doctor?.specialization || "N/A"}
+              {appointment.doctor?.specialization || "N/A"}
             </p>
 
             <p>
@@ -113,28 +119,28 @@ appointments.map((appointment) => (
             </p>
 
             <p>
-  <strong>Status:</strong>
+              <strong>Status:</strong>
 
-  <span
-    style={{
-      marginLeft: "10px",
-      fontWeight: "bold",
-      color:
-        appointment.status === "Accepted"
-          ? "green"
-          : appointment.status === "Rejected"
-          ? "red"
-          : appointment.status === "Completed"
-          ? "blue"
-          : appointment.status === "Cancelled"
-          ? "gray"
-          : "orange",
-    }}
-  >
-    {appointment.status}
-  </span>
+              <span
+                style={{
+                  marginLeft: "10px",
+                  fontWeight: "bold",
+                  color:
+                    appointment.status === "Accepted"
+                      ? "green"
+                      : appointment.status === "Rejected"
+                      ? "red"
+                      : appointment.status === "Completed"
+                      ? "blue"
+                      : appointment.status === "Cancelled"
+                      ? "gray"
+                      : "orange",
+                }}
+              >
+                {appointment.status}
+              </span>
 
-</p>
+            </p>
 
             {appointment.status === "Pending" && (
               <button

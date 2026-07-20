@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, User } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
@@ -104,6 +105,10 @@ function Appointments() {
 
     <div className="appointments-container">
 
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
+
       <h1><CalendarDays size={20} /> Manage Appointments</h1>
 
       <div className="filter-section">
@@ -136,80 +141,81 @@ function Appointments() {
       </p>
 
       <div className="appointment-grid">
-              {
-        filteredAppointments.length === 0 ? (
 
-          <p className="no-data">
-            No Appointments Found
-          </p>
+        {
+          filteredAppointments.length === 0 ? (
 
-        ) : (
+            <p className="no-data">
+              No Appointments Found
+            </p>
 
-          filteredAppointments.map((appointment) => (
+          ) : (
 
-            <div
-              key={appointment._id}
-              className="appointment-card"
-            >
+            filteredAppointments.map((appointment) => (
 
-              <h2>
-                <User size={18} /> {appointment.patient?.name}
-              </h2>
+              <div
+                key={appointment._id}
+                className="appointment-card"
+              >
 
-              <p>
-                <strong>Doctor :</strong>{" "}
-                {appointment.doctor?.name}
-              </p>
+                <h2>
+                  <User size={18} /> {appointment.patient?.name}
+                </h2>
 
-              <p>
-                <strong>Specialization :</strong>{" "}
-                {appointment.doctor?.specialization}
-              </p>
+                <p>
+                  <strong>Doctor :</strong>{" "}
+                  {appointment.doctor?.name}
+                </p>
 
-              <p>
-                <strong>Date :</strong>{" "}
-                {new Date(
-                  appointment.appointmentDate
-                ).toLocaleDateString()}
-              </p>
+                <p>
+                  <strong>Specialization :</strong>{" "}
+                  {appointment.doctor?.specialization}
+                </p>
 
-              <p>
-                <strong>Time :</strong>{" "}
-                {appointment.appointmentTime}
-              </p>
+                <p>
+                  <strong>Date :</strong>{" "}
+                  {new Date(
+                    appointment.appointmentDate
+                  ).toLocaleDateString()}
+                </p>
 
-              <p>
-                <strong>Symptoms :</strong>{" "}
-                {appointment.symptoms || "Not Mentioned"}
-              </p>
+                <p>
+                  <strong>Time :</strong>{" "}
+                  {appointment.appointmentTime}
+                </p>
 
-              <p>
-                <strong>Status :</strong>
+                <p>
+                  <strong>Symptoms :</strong>{" "}
+                  {appointment.symptoms || "Not Mentioned"}
+                </p>
 
-                <span
-                  className={
-                    appointment.status === "Accepted"
-                      ? "status accepted"
-                      : appointment.status === "Rejected"
-                      ? "status rejected"
-                      : appointment.status === "Completed"
-                      ? "status completed"
-                      : appointment.status === "Cancelled"
-                      ? "status cancelled"
-                      : "status pending"
-                  }
-                >
-                  {appointment.status}
-                </span>
+                <p>
+                  <strong>Status :</strong>
 
-              </p>
+                  <span
+                    className={
+                      appointment.status === "Accepted"
+                        ? "status accepted"
+                        : appointment.status === "Rejected"
+                        ? "status rejected"
+                        : appointment.status === "Completed"
+                        ? "status completed"
+                        : appointment.status === "Cancelled"
+                        ? "status cancelled"
+                        : "status pending"
+                    }
+                  >
+                    {appointment.status}
+                  </span>
 
-            </div>
+                </p>
 
-          ))
+              </div>
 
-        )
-      }
+            ))
+
+          )
+        }
 
       </div>
 

@@ -1,4 +1,5 @@
 import "./Dashboard.css";
+import BackButton from "../../components/BackButton";
 import { Brain, Building2, CalendarDays, FileText, Hand, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -32,6 +33,12 @@ function Dashboard() {
           Logout
         </button>
       </header>
+
+      {/* ================= BACK BUTTON ================= */}
+
+      <div style={{ padding: "20px" }}>
+        <BackButton />
+      </div>
 
       {/* ================= WELCOME ================= */}
 

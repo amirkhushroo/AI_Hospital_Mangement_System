@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -34,15 +35,13 @@ function Appointment() {
     try {
 
       const response = await api.get("/doctor/all", {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-});
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       if (response.data.success) {
-
         setDoctors(response.data.doctors);
-
       }
 
     } catch (error) {
@@ -64,11 +63,8 @@ function Appointment() {
     const { name, value } = e.target;
 
     setFormData({
-
       ...formData,
-
       [name]: value,
-
     });
 
     if (name === "doctorId") {
@@ -106,25 +102,16 @@ function Appointment() {
 
       setLoading(true);
 
-      const token =
-        localStorage.getItem("token");
+      const token = localStorage.getItem("token");
 
       const response = await api.post(
-
         "/appointment/book",
-
         formData,
-
         {
-
           headers: {
-
             Authorization: `Bearer ${token}`,
-
           },
-
         }
-
       );
 
       if (response.data.success) {
@@ -140,11 +127,8 @@ function Appointment() {
       console.log(error);
 
       toast.error(
-
         error.response?.data?.message ||
-
         "Booking Failed"
-
       );
 
     } finally {
@@ -154,8 +138,14 @@ function Appointment() {
     }
 
   };
-    return (
+
+  return (
+
     <div className="appointment-container">
+
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
 
       <div className="appointment-card">
 
@@ -180,7 +170,7 @@ function Appointment() {
                 key={doctor._id}
                 value={doctor._id}
               >
-                 {doctor.name} - {doctor.specialization}
+                {doctor.name} - {doctor.specialization}
               </option>
 
             ))}
@@ -195,39 +185,25 @@ function Appointment() {
 
               <h2>Doctor Information</h2>
 
+              <p><strong>Name :</strong> Dr. {selectedDoctor.name}</p>
+
+              <p><strong>Specialization :</strong> {selectedDoctor.specialization}</p>
+
+              <p><strong>Qualification :</strong> {selectedDoctor.qualification}</p>
+
+              <p><strong>Hospital :</strong> {selectedDoctor.hospital}</p>
+
+              <p><strong>Consultation Fee :</strong> ₹{selectedDoctor.consultationFee}</p>
+
               <p>
-                <strong>Name :</strong> Dr. {selectedDoctor.name}
+                <strong>Available Days :</strong>{" "}
+                {selectedDoctor?.availableDays?.join(", ")}
               </p>
 
               <p>
-                <strong>Specialization :</strong>{" "}
-                {selectedDoctor.specialization}
+                <strong>Available Time :</strong>{" "}
+                {selectedDoctor?.availableTime?.start} - {selectedDoctor?.availableTime?.end}
               </p>
-
-              <p>
-                <strong>Qualification :</strong>{" "}
-                {selectedDoctor.qualification}
-              </p>
-
-              <p>
-                <strong>Hospital :</strong>{" "}
-                {selectedDoctor.hospital}
-              </p>
-
-              <p>
-                <strong>Consultation Fee :</strong> ₹
-                {selectedDoctor.consultationFee}
-              </p>
-
-              <p>
-  <strong>Available Days :</strong>{" "}
-  {selectedDoctor?.availableDays?.join(", ")}
-</p>
-
-<p>
-  <strong>Available Time :</strong>{" "}
-  {selectedDoctor?.availableTime?.start} - {selectedDoctor?.availableTime?.end}
-</p>
 
             </div>
 
@@ -253,7 +229,6 @@ function Appointment() {
             name="appointmentTime"
             value={formData.appointmentTime}
             onChange={handleChange}
-           
           />
 
           {/* ================= Symptoms ================= */}
@@ -274,9 +249,7 @@ function Appointment() {
             type="submit"
             disabled={loading}
           >
-            {loading
-              ? "Booking..."
-              : "Book Appointment"}
+            {loading ? "Booking..." : "Book Appointment"}
           </button>
 
         </form>
@@ -284,7 +257,9 @@ function Appointment() {
       </div>
 
     </div>
+
   );
-  }
+
+}
 
 export default Appointment;

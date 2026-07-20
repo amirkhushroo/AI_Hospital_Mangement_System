@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Trash2, User, Users } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
@@ -107,6 +108,10 @@ function Patients() {
 
     <div className="patients-container">
 
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
+
       <h1><Users size={20} /> Manage Patients</h1>
 
       <input
@@ -122,66 +127,67 @@ function Patients() {
       </p>
 
       <div className="patient-grid">
-              {
-        filteredPatients.length === 0 ? (
 
-          <p className="no-data">
-            No Patients Found
-          </p>
+        {
+          filteredPatients.length === 0 ? (
 
-        ) : (
+            <p className="no-data">
+              No Patients Found
+            </p>
 
-          filteredPatients.map((patient) => (
+          ) : (
 
-            <div
-              key={patient._id}
-              className="patient-card"
-            >
+            filteredPatients.map((patient) => (
 
-              <h2>
-                <User size={18} /> {patient.name}
-              </h2>
-
-              <p>
-                <strong>Email :</strong>{" "}
-                {patient.email}
-              </p>
-
-              <p>
-                <strong>Phone :</strong>{" "}
-                {patient.phone}
-              </p>
-
-              <p>
-                <strong>Age :</strong>{" "}
-                {patient.age}
-              </p>
-
-              <p>
-                <strong>Gender :</strong>{" "}
-                {patient.gender}
-              </p>
-
-              <p>
-                <strong>Address :</strong>{" "}
-                {patient.address}
-              </p>
-
-              <button
-                className="delete-btn"
-                onClick={() =>
-                  deletePatient(patient._id)
-                }
+              <div
+                key={patient._id}
+                className="patient-card"
               >
-                <Trash2 size={16} /> Delete Patient
-              </button>
 
-            </div>
+                <h2>
+                  <User size={18} /> {patient.name}
+                </h2>
 
-          ))
+                <p>
+                  <strong>Email :</strong>{" "}
+                  {patient.email}
+                </p>
 
-        )
-      }
+                <p>
+                  <strong>Phone :</strong>{" "}
+                  {patient.phone}
+                </p>
+
+                <p>
+                  <strong>Age :</strong>{" "}
+                  {patient.age}
+                </p>
+
+                <p>
+                  <strong>Gender :</strong>{" "}
+                  {patient.gender}
+                </p>
+
+                <p>
+                  <strong>Address :</strong>{" "}
+                  {patient.address}
+                </p>
+
+                <button
+                  className="delete-btn"
+                  onClick={() =>
+                    deletePatient(patient._id)
+                  }
+                >
+                  <Trash2 size={16} /> Delete Patient
+                </button>
+
+              </div>
+
+            ))
+
+          )
+        }
 
       </div>
 

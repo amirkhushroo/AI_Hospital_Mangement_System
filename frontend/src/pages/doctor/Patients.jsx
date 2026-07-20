@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Stethoscope, User } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
@@ -31,7 +32,6 @@ function Patients() {
         }
       );
 
-
       if (response.data.success) {
 
         setPatients(response.data.appointments);
@@ -58,12 +58,13 @@ function Patients() {
     setSearch(value);
 
     const filtered = patients.filter(
-  (item) =>
-    item.patient &&
-    item.patient.name
-      .toLowerCase()
-      .includes(value.toLowerCase())
-);
+      (item) =>
+        item.patient &&
+        item.patient.name
+          .toLowerCase()
+          .includes(value.toLowerCase())
+    );
+
     setFilteredPatients(filtered);
 
   };
@@ -71,6 +72,10 @@ function Patients() {
   return (
 
     <div className="patients-container">
+
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
 
       <h1><Stethoscope size={20} /> My Patients</h1>
 
@@ -83,13 +88,14 @@ function Patients() {
       />
 
       {
-        filteredPatients.length === 0 ?
+
+        filteredPatients.length === 0 ? (
 
           <p className="no-data">
             No Patients Found
           </p>
 
-          :
+        ) : (
 
           filteredPatients.map((item) => (
 
@@ -134,16 +140,15 @@ function Patients() {
 
               <p>
                 <strong>Date :</strong>{" "}
-                {new Date(
-                  item.appointmentDate
-                ).toLocaleDateString()}
+                {new Date(item.appointmentDate).toLocaleDateString()}
               </p>
 
               <p>
                 <strong>Time :</strong>{" "}
                 {item.appointmentTime}
               </p>
-                            <p>
+
+              <p>
                 <strong>Status :</strong>
 
                 <span
@@ -167,6 +172,8 @@ function Patients() {
             </div>
 
           ))
+
+        )
 
       }
 

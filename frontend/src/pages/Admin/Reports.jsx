@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Activity, Brain, User } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Reports.css";
@@ -88,6 +89,10 @@ function Reports() {
 
     <div className="reports-container">
 
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
+
       <h1>
         <Activity size={20} /> Hospital Reports
       </h1>
@@ -121,65 +126,63 @@ function Reports() {
       </h2>
 
       <div className="report-grid">
-              {
-        reports.length === 0 ? (
 
-          <p className="no-data">
-            No AI Reports Found
-          </p>
+        {
+          reports.length === 0 ? (
 
-        ) : (
+            <p className="no-data">
+              No AI Reports Found
+            </p>
 
-          reports.map((report) => (
+          ) : (
 
-            <div
-              key={report._id}
-              className="report-card"
-            >
+            reports.map((report) => (
 
-              <h3>
-                <User size={16} /> {report.patient?.name}
-              </h3>
+              <div
+                key={report._id}
+                className="report-card"
+              >
 
-              <p>
-                <strong>Email :</strong>{" "}
-                {report.patient?.email}
-              </p>
+                <h3>
+                  <User size={16} /> {report.patient?.name}
+                </h3>
 
-              <p>
-                <strong>Symptoms :</strong>{" "}
-                {report.symptoms}
-              </p>
+                <p>
+                  <strong>Email :</strong>{" "}
+                  {report.patient?.email}
+                </p>
 
-              <p>
-                <strong>Predicted Disease :</strong>{" "}
-                {report.prediction}
-              </p>
+                <p>
+                  <strong>Symptoms :</strong>{" "}
+                  {report.symptoms}
+                </p>
 
-              <p>
-                <strong>Confidence :</strong>{" "}
-                {report.confidence}%
-              </p>
+                <p>
+                  <strong>Predicted Disease :</strong>{" "}
+                  {report.prediction}
+                </p>
 
-              <p>
-                <strong>Precautions :</strong>{" "}
-                {report.precautions}
-              </p>
+                <p>
+                  <strong>Confidence :</strong>{" "}
+                  {report.confidence}%
+                </p>
 
-              <p>
-                <strong>Date :</strong>{" "}
-                {
-                  new Date(report.createdAt)
-                    .toLocaleDateString()
-                }
-              </p>
+                <p>
+                  <strong>Precautions :</strong>{" "}
+                  {report.precautions}
+                </p>
 
-            </div>
+                <p>
+                  <strong>Date :</strong>{" "}
+                  {new Date(report.createdAt).toLocaleDateString()}
+                </p>
 
-          ))
+              </div>
 
-        )
-      }
+            ))
+
+          )
+        }
 
       </div>
 

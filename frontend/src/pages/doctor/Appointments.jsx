@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, CircleX, CalendarDays, User } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
@@ -28,6 +29,7 @@ function Appointments() {
           },
         }
       );
+
       console.log("Doctor Appointments Response:", response.data);
 
       if (response.data.success) {
@@ -66,9 +68,7 @@ function Appointments() {
 
       if (response.data.success) {
 
-        toast.success(
-          `Appointment ${status}`
-        );
+        toast.success(`Appointment ${status}`);
 
         fetchAppointments();
 
@@ -88,14 +88,20 @@ function Appointments() {
 
     <div className="appointments-container">
 
-      <h1><CalendarDays size={20} /> Doctor Appointments</h1>
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
+
+      <h1>
+        <CalendarDays size={20} /> Doctor Appointments
+      </h1>
 
       {
-        appointments.length === 0 ?
+        appointments.length === 0 ? (
 
           <p>No Appointments Found</p>
 
-          :
+        ) : (
 
           appointments.map((app) => (
 
@@ -104,33 +110,28 @@ function Appointments() {
               key={app._id}
             >
 
-             <h3>
-  <User size={18} /> {app.patient?.name || "Unknown Patient"}
-</h3>
+              <h3>
+                <User size={18} /> {app.patient?.name || "Unknown Patient"}
+              </h3>
 
-<p>
-  <b>Email :</b> {app.patient?.email || "N/A"}
-</p>
+              <p>
+                <b>Email :</b> {app.patient?.email || "N/A"}
+              </p>
 
-<p>
-  <b>Phone :</b> {app.patient?.phone || "N/A"}
-</p>
+              <p>
+                <b>Phone :</b> {app.patient?.phone || "N/A"}
+              </p>
+
               <p>
                 <b>Date :</b>{" "}
-                {
-                  new Date(
-                    app.appointmentDate
-                  ).toLocaleDateString()
-                }
+                {new Date(app.appointmentDate).toLocaleDateString()}
               </p>
 
               <p>
-                <b>Time :</b>{" "}
-                {app.appointmentTime}
+                <b>Time :</b> {app.appointmentTime}
               </p>
 
               <p>
-
                 <b>Status :</b>
 
                 <span
@@ -149,38 +150,29 @@ function Appointments() {
                         : "orange",
                   }}
                 >
-
                   {app.status}
-
                 </span>
 
               </p>
 
               <p>
-
-                <b>Symptoms :</b>
-
-                {app.symptoms || "Not Mentioned"}
-
+                <b>Symptoms :</b> {app.symptoms || "Not Mentioned"}
               </p>
 
               <div className="btn-group">
-                          {app.status === "Pending" && (
+
+                {app.status === "Pending" && (
                   <>
                     <button
                       className="accept-btn"
-                      onClick={() =>
-                        updateStatus(app._id, "Accepted")
-                      }
+                      onClick={() => updateStatus(app._id, "Accepted")}
                     >
                       <Check size={16} /> Accept
                     </button>
 
                     <button
                       className="reject-btn"
-                      onClick={() =>
-                        updateStatus(app._id, "Rejected")
-                      }
+                      onClick={() => updateStatus(app._id, "Rejected")}
                     >
                       <CircleX size={16} /> Reject
                     </button>
@@ -190,9 +182,7 @@ function Appointments() {
                 {app.status === "Accepted" && (
                   <button
                     className="complete-btn"
-                    onClick={() =>
-                      updateStatus(app._id, "Completed")
-                    }
+                    onClick={() => updateStatus(app._id, "Completed")}
                   >
                     <Check size={16} /> Complete
                   </button>
@@ -228,6 +218,7 @@ function Appointments() {
 
           ))
 
+        )
       }
 
     </div>

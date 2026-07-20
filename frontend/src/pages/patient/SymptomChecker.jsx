@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bot, Sparkles, ShieldAlert, Stethoscope } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -27,7 +28,9 @@ function SplitText({ text, className = "", delay = 35, duration = 0.7 }) {
               {char}
             </motion.span>
           ))}
-          {wordIndex < words.length - 1 ? <span className="split-space">&nbsp;</span> : null}
+          {wordIndex < words.length - 1 ? (
+            <span className="split-space">&nbsp;</span>
+          ) : null}
         </span>
       ))}
     </span>
@@ -58,9 +61,7 @@ function SymptomChecker() {
 
       const response = await api.post(
         "/ai/symptom-checker",
-        {
-          symptoms,
-        },
+        { symptoms },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,11 +70,8 @@ function SymptomChecker() {
       );
 
       if (response.data.success) {
-
         setResult(response.data);
-
         toast.success("Symptoms analyzed successfully");
-
       }
 
     } catch (error) {
@@ -102,11 +100,18 @@ function SymptomChecker() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
 
+      {/* ================= BACK BUTTON ================= */}
+
+      <BackButton />
+
       <h1>
-        <span className="symptom-icon" aria-hidden="true">
+        <span className="symptom-icon">
           <Bot size={24} />
         </span>
-        <SplitText text="AI Symptom Checker" className="symptom-title-text" />
+        <SplitText
+          text="AI Symptom Checker"
+          className="symptom-title-text"
+        />
       </h1>
 
       <textarea
@@ -122,7 +127,11 @@ function SymptomChecker() {
         disabled={loading}
         whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 280, damping: 20 }}
+        transition={{
+          type: "spring",
+          stiffness: 280,
+          damping: 20,
+        }}
       >
         <Sparkles size={18} />
         {loading ? "Analyzing..." : "Analyze Symptoms"}
@@ -134,30 +143,16 @@ function SymptomChecker() {
           className="result-card"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5 }}
         >
 
           <h2>Analysis Result</h2>
 
-          <p>
-            <strong>Disease :</strong>{" "}
-            {result.result.possibleDisease}
-          </p>
+          <p><strong>Disease :</strong> {result.result.possibleDisease}</p>
+          <p><strong>Confidence :</strong> {result.result.confidence}</p>
+          <p><strong>Severity :</strong> {result.result.severity}</p>
+          <p><strong>Recommended Doctor :</strong> {result.result.recommendedDoctor}</p>
 
-          <p>
-            <strong>Confidence :</strong>{" "}
-            {result.result.confidence}
-          </p>
-
-          <p>
-            <strong>Severity :</strong>{" "}
-            {result.result.severity}
-          </p>
-
-          <p>
-            <strong>Recommended Doctor :</strong>{" "}
-            {result.result.recommendedDoctor}
-          </p>
           <p>
             <strong>Medicines :</strong>{" "}
             {result.result.medicines?.length
@@ -201,9 +196,7 @@ function SymptomChecker() {
                 <ShieldAlert size={18} /> Emergency Alert
               </h3>
 
-              <p>
-                {result.result.emergencyMessage}
-              </p>
+              <p>{result.result.emergencyMessage}</p>
 
             </div>
 
@@ -225,30 +218,11 @@ function SymptomChecker() {
                   {doctor.name}
                 </h3>
 
-                <p>
-                  <strong>Specialization :</strong>{" "}
-                  {doctor.specialization}
-                </p>
-
-                <p>
-                  <strong>Qualification :</strong>{" "}
-                  {doctor.qualification}
-                </p>
-
-                <p>
-                  <strong>Hospital :</strong>{" "}
-                  {doctor.hospital}
-                </p>
-
-                <p>
-                  <strong>Consultation Fee :</strong> ₹
-                  {doctor.consultationFee}
-                </p>
-
-                <p>
-                  <strong>Phone :</strong>{" "}
-                  {doctor.phone}
-                </p>
+                <p><strong>Specialization :</strong> {doctor.specialization}</p>
+                <p><strong>Qualification :</strong> {doctor.qualification}</p>
+                <p><strong>Hospital :</strong> {doctor.hospital}</p>
+                <p><strong>Consultation Fee :</strong> ₹{doctor.consultationFee}</p>
+                <p><strong>Phone :</strong> {doctor.phone}</p>
 
                 <p>
                   <strong>Available Days :</strong>{" "}
@@ -257,15 +231,12 @@ function SymptomChecker() {
 
                 <p>
                   <strong>Available Time :</strong>{" "}
-                  {doctor.availableTime?.start} -
-                  {doctor.availableTime?.end}
+                  {doctor.availableTime?.start} - {doctor.availableTime?.end}
                 </p>
 
                 <motion.button
                   className="doctor-book-btn"
-                  onClick={() =>
-                    navigate("/patient/appointment")
-                  }
+                  onClick={() => navigate("/patient/appointment")}
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
