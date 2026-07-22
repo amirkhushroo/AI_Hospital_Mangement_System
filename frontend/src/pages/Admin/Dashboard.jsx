@@ -1,4 +1,5 @@
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -18,6 +19,8 @@ function Dashboard() {
 
   const admin = JSON.parse(localStorage.getItem("admin"));
 
+  const [loading, setLoading] = useState(true);
+
   const [dashboard, setDashboard] = useState({
     totalDoctors: 0,
     totalPatients: 0,
@@ -33,6 +36,8 @@ function Dashboard() {
 
   const fetchDashboard = async () => {
     try {
+      setLoading(true);
+
       const token = localStorage.getItem("adminToken");
 
       const response = await api.get("/admin/dashboard", {
@@ -47,6 +52,8 @@ function Dashboard() {
     } catch (error) {
       console.log(error);
       toast.error("Failed to load dashboard");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,6 +67,10 @@ function Dashboard() {
 
     navigate("/admin/login");
   };
+
+  if (loading) {
+    return <Loader text="Loading Dashboard..." />;
+  }
 
   return (
     <div className="dashboard-container">

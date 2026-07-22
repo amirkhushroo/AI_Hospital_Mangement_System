@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Activity, Brain, User } from "lucide-react";
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Reports.css";
 
 function Reports() {
+
+  const [loading, setLoading] = useState(true);
 
   const [dashboard, setDashboard] = useState({
     totalDoctors: 0,
@@ -18,10 +21,24 @@ function Reports() {
 
   useEffect(() => {
 
-    fetchDashboard();
-    fetchReports();
+    fetchData();
 
   }, []);
+
+  // ================= FETCH ALL DATA =================
+
+  const fetchData = async () => {
+
+    setLoading(true);
+
+    await Promise.all([
+      fetchDashboard(),
+      fetchReports(),
+    ]);
+
+    setLoading(false);
+
+  };
 
   // ================= DASHBOARD =================
 
@@ -84,6 +101,10 @@ function Reports() {
     }
 
   };
+
+  if (loading) {
+    return <Loader text="Loading Reports..." />;
+  }
 
   return (
 

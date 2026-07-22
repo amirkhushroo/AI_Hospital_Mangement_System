@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Check, CircleX, CalendarDays, User } from "lucide-react";
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
 
 function Appointments() {
 
+  const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
@@ -19,6 +21,8 @@ function Appointments() {
 
     try {
 
+      setLoading(true);
+
       const token = localStorage.getItem("doctorToken");
 
       const response = await api.get(
@@ -30,8 +34,6 @@ function Appointments() {
         }
       );
 
-      console.log("Doctor Appointments Response:", response.data);
-
       if (response.data.success) {
         setAppointments(response.data.appointments);
       }
@@ -41,6 +43,10 @@ function Appointments() {
       console.log(error);
 
       toast.error("Failed to load appointments");
+
+    } finally {
+
+      setLoading(false);
 
     }
 
@@ -83,6 +89,10 @@ function Appointments() {
     }
 
   };
+
+  if (loading) {
+    return <Loader text="Loading Appointments..." />;
+  }
 
   return (
 

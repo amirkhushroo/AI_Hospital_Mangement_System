@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, User } from "lucide-react";
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
 
 function Appointments() {
 
+  const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [search, setSearch] = useState("");
@@ -21,6 +23,8 @@ function Appointments() {
   const fetchAppointments = async () => {
 
     try {
+
+      setLoading(true);
 
       const token = localStorage.getItem("adminToken");
 
@@ -45,6 +49,10 @@ function Appointments() {
       console.log(error);
 
       toast.error("Failed to load appointments");
+
+    } finally {
+
+      setLoading(false);
 
     }
 
@@ -100,6 +108,10 @@ function Appointments() {
     handleFilter(search, value);
 
   };
+
+  if (loading) {
+    return <Loader text="Loading Appointments..." />;
+  }
 
   return (
 

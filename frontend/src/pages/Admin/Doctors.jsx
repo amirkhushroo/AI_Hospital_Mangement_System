@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Stethoscope, Trash2 } from "lucide-react";
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Doctors.css";
 
 function Doctors() {
+  const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [search, setSearch] = useState("");
@@ -18,6 +20,8 @@ function Doctors() {
 
   const fetchDoctors = async () => {
     try {
+      setLoading(true);
+
       const token = localStorage.getItem("adminToken");
 
       const response = await api.get("/admin/doctors", {
@@ -33,6 +37,8 @@ function Doctors() {
     } catch (error) {
       console.log(error);
       toast.error("Failed to load doctors");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,6 +83,10 @@ function Doctors() {
       toast.error("Delete Failed");
     }
   };
+
+  if (loading) {
+    return <Loader text="Loading Doctors..." />;
+  }
 
   return (
     <div className="doctors-container">

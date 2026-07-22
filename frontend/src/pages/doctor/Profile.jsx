@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Stethoscope } from "lucide-react";
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
 
 function Profile() {
+
+  const [loading, setLoading] = useState(true);
 
   const [doctor, setDoctor] = useState(null);
 
@@ -16,7 +19,7 @@ function Profile() {
     experience: "",
     consultationFee: "",
     phone: "",
-    hospital: ""
+    hospital: "",
   });
 
   useEffect(() => {
@@ -27,6 +30,8 @@ function Profile() {
 
   const fetchProfile = async () => {
     try {
+
+      setLoading(true);
 
       const token = localStorage.getItem("doctorToken");
 
@@ -42,7 +47,14 @@ function Profile() {
       }
 
     } catch (error) {
+
+      console.log(error);
       toast.error("Failed to load profile");
+
+    } finally {
+
+      setLoading(false);
+
     }
   };
 
@@ -51,7 +63,7 @@ function Profile() {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -80,9 +92,16 @@ function Profile() {
       }
 
     } catch (error) {
+
+      console.log(error);
       toast.error("Update Failed");
+
     }
   };
+
+  if (loading) {
+    return <Loader text="Loading Profile..." />;
+  }
 
   return (
     <div className="profile-container">
@@ -91,7 +110,9 @@ function Profile() {
 
       <BackButton />
 
-      <h1><Stethoscope size={20} /> Doctor Profile</h1>
+      <h1>
+        <Stethoscope size={20} /> Doctor Profile
+      </h1>
 
       <form className="profile-card" onSubmit={updateProfile}>
 

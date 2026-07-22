@@ -8,7 +8,8 @@ const registerPatient = async (req, res) => {
   try {
     let { name, email, password, age, gender, phone, address } = req.body;
 
-    // Validate Required Fields
+    // ====================== Validate Required Fields ======================
+
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -16,11 +17,21 @@ const registerPatient = async (req, res) => {
       });
     }
 
-    // Normalize Input
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT Secret is not configured",
+      });
+    }
+
+    // ====================== Normalize Input ======================
+
     name = name.trim();
     email = email.trim().toLowerCase();
+    password = password.trim();
 
-    // Check Existing Patient
+    // ====================== Check Existing Patient ======================
+
     const existingPatient = await Patient.findOne({ email });
 
     if (existingPatient) {
@@ -30,10 +41,12 @@ const registerPatient = async (req, res) => {
       });
     }
 
-    // Hash Password
+    // ====================== Hash Password ======================
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create Patient
+    // ====================== Create Patient ======================
+
     const patient = await Patient.create({
       name,
       email,
@@ -44,7 +57,8 @@ const registerPatient = async (req, res) => {
       address,
     });
 
-    // Generate Token
+    // ====================== Generate Token ======================
+
     const token = jwt.sign(
       { id: patient._id },
       process.env.JWT_SECRET,
@@ -67,28 +81,26 @@ const registerPatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
 // ====================== LOGIN PATIENT ======================
-// ====================== LOGIN PATIENT ======================
 
 const loginPatient = async (req, res) => {
   try {
-    console.log("========== LOGIN REQUEST ==========");
-    console.log("Request Body:", req.body);
 
     let { email, password } = req.body;
 
-    console.log("Email:", email);
+    // ====================== Validate Required Fields ======================
 
-    // Validate Required Fields
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -96,13 +108,21 @@ const loginPatient = async (req, res) => {
       });
     }
 
-    // Normalize Email
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT Secret is not configured",
+      });
+    }
+
+    // ====================== Normalize Input ======================
+
     email = email.trim().toLowerCase();
+    password = password.trim();
 
-    // Find Patient
+    // ====================== Find Patient ======================
+
     const patient = await Patient.findOne({ email });
-
-    console.log("Patient Found:", patient);
 
     if (!patient) {
       return res.status(404).json({
@@ -111,10 +131,9 @@ const loginPatient = async (req, res) => {
       });
     }
 
-    // Compare Password
-    const isMatch = await bcrypt.compare(password, patient.password);
+    // ====================== Compare Password ======================
 
-    console.log("Password Match:", isMatch);
+    const isMatch = await bcrypt.compare(password, patient.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -123,7 +142,8 @@ const loginPatient = async (req, res) => {
       });
     }
 
-    // Generate Token
+    // ====================== Generate Token ======================
+
     const token = jwt.sign(
       { id: patient._id },
       process.env.JWT_SECRET,
@@ -146,13 +166,14 @@ const loginPatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("========== LOGIN ERROR ==========");
+
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -176,12 +197,14 @@ const getPatientProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -189,6 +212,7 @@ const getPatientProfile = async (req, res) => {
 
 const updatePatientProfile = async (req, res) => {
   try {
+
     const { name, age, gender, phone, address } = req.body;
 
     const patient = await Patient.findById(req.user.id);
@@ -203,8 +227,8 @@ const updatePatientProfile = async (req, res) => {
     if (name !== undefined) patient.name = name.trim();
     if (age !== undefined) patient.age = age;
     if (gender !== undefined) patient.gender = gender;
-    if (phone !== undefined) patient.phone = phone;
-    if (address !== undefined) patient.address = address;
+    if (phone !== undefined) patient.phone = phone.trim();
+    if (address !== undefined) patient.address = address.trim();
 
     await patient.save();
 
@@ -223,12 +247,14 @@ const updatePatientProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import BackButton from "../../components/BackButton";
+import Loader from "../../components/Loader/Loader";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -10,6 +11,7 @@ function Appointment() {
 
   const navigate = useNavigate();
 
+  const [pageLoading, setPageLoading] = useState(true);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -34,6 +36,8 @@ function Appointment() {
 
     try {
 
+      setPageLoading(true);
+
       const response = await api.get("/doctor/all", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -49,6 +53,10 @@ function Appointment() {
       console.log(error);
 
       toast.error("Unable to load doctors");
+
+    } finally {
+
+      setPageLoading(false);
 
     }
 
@@ -139,11 +147,13 @@ function Appointment() {
 
   };
 
+  if (pageLoading) {
+    return <Loader text="Loading Doctors..." />;
+  }
+
   return (
 
     <div className="appointment-container">
-
-      {/* ================= BACK BUTTON ================= */}
 
       <BackButton />
 
@@ -152,8 +162,6 @@ function Appointment() {
         <h1><CalendarDays size={20} /> Book Appointment</h1>
 
         <form onSubmit={handleSubmit}>
-
-          {/* ================= Doctor ================= */}
 
           <label>Select Doctor</label>
 
@@ -177,8 +185,6 @@ function Appointment() {
 
           </select>
 
-          {/* ================= Doctor Details ================= */}
-
           {selectedDoctor && (
 
             <div className="doctor-info">
@@ -186,13 +192,9 @@ function Appointment() {
               <h2>Doctor Information</h2>
 
               <p><strong>Name :</strong> Dr. {selectedDoctor.name}</p>
-
               <p><strong>Specialization :</strong> {selectedDoctor.specialization}</p>
-
               <p><strong>Qualification :</strong> {selectedDoctor.qualification}</p>
-
               <p><strong>Hospital :</strong> {selectedDoctor.hospital}</p>
-
               <p><strong>Consultation Fee :</strong> ₹{selectedDoctor.consultationFee}</p>
 
               <p>
@@ -209,8 +211,6 @@ function Appointment() {
 
           )}
 
-          {/* ================= Date ================= */}
-
           <label>Appointment Date</label>
 
           <input
@@ -219,8 +219,6 @@ function Appointment() {
             value={formData.appointmentDate}
             onChange={handleChange}
           />
-
-          {/* ================= Time ================= */}
 
           <label>Appointment Time</label>
 
@@ -231,8 +229,6 @@ function Appointment() {
             onChange={handleChange}
           />
 
-          {/* ================= Symptoms ================= */}
-
           <label>Symptoms</label>
 
           <textarea
@@ -242,8 +238,6 @@ function Appointment() {
             value={formData.symptoms}
             onChange={handleChange}
           />
-
-          {/* ================= Button ================= */}
 
           <button
             type="submit"

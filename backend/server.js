@@ -16,8 +16,9 @@ const app = express();
 // ====================== Middleware ======================
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://ai-hospital-mangement-system.vercel.app",
+  process.env.CLIENT_URL || "http://localhost:5173",
+  process.env.PRODUCTION_URL ||
+    "https://ai-hospital-mangement-system.vercel.app",
 ];
 
 app.use(
@@ -29,15 +30,18 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
+      return callback(
+        new Error("CORS policy does not allow access from this origin.")
+      );
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ⭐⭐⭐ ADD THIS LINE ⭐⭐⭐
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // ====================== MongoDB Connection ======================
 
 mongoose
@@ -47,6 +51,9 @@ mongoose
     console.log("✅ MongoDB Connected Successfully");
     console.log("📂 Database Name:", mongoose.connection.name);
     console.log("🌐 Host:", mongoose.connection.host);
+    console.log(
+      `🌍 Environment: ${process.env.NODE_ENV || "development"}`
+    );
     console.log("====================================");
   })
   .catch((err) => {
@@ -80,6 +87,17 @@ app.use("/api/appointment", appointmentRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/admin", adminRoutes);
 
+// ====================== Global Error Handler ======================
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
 // ====================== Handle Invalid Routes ======================
 
 app.use((req, res) => {
@@ -96,5 +114,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log("====================================");
   console.log(`🚀 Server Running on Port ${PORT}`);
+  console.log(
+    `🌍 Environment: ${process.env.NODE_ENV || "development"}`
+  );
   console.log("====================================");
 });

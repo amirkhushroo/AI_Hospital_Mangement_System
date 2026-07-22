@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 
 const createAdmin = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -19,6 +19,9 @@ const createAdmin = async (req, res) => {
         message: "All fields are required",
       });
     }
+
+    name = name.trim();
+    email = email.trim().toLowerCase();
 
     const existingAdmin = await Admin.findOne({ email });
 
@@ -46,12 +49,14 @@ const createAdmin = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -59,8 +64,8 @@ const createAdmin = async (req, res) => {
 
 const adminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
- console.log("Admin Login Attempt:", email);
+    let { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -68,7 +73,17 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    const admin = await Admin.findOne({ email });
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT Secret is not configured",
+      });
+    }
+
+    email = email.trim().toLowerCase();
+
+    // Fetch admin with password
+    const admin = await Admin.findOne({ email }).select("+password");
 
     if (!admin) {
       return res.status(404).json({
@@ -77,19 +92,28 @@ const adminLogin = async (req, res) => {
       });
     }
 
+    if (!admin.password) {
+      return res.status(500).json({
+        success: false,
+        message: "Admin password is missing from database.",
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, admin.password);
 
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid Email or Password",
       });
     }
 
     const token = jwt.sign(
       { id: admin._id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
     res.status(200).json({
@@ -102,13 +126,12 @@ const adminLogin = async (req, res) => {
         email: admin.email,
       },
     });
-
   } catch (error) {
-    console.log(error);
+    console.error("Admin Login Error:", error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
   }
 };
@@ -117,18 +140,21 @@ const adminLogin = async (req, res) => {
 
 const getAdminProfile = async (req, res) => {
   try {
+
     res.status(200).json({
       success: true,
       admin: req.admin,
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -136,6 +162,7 @@ const getAdminProfile = async (req, res) => {
 
 const getDashboard = async (req, res) => {
   try {
+
     const totalPatients = await Patient.countDocuments();
     const totalDoctors = await Doctor.countDocuments();
     const totalAppointments = await Appointment.countDocuments();
@@ -152,12 +179,14 @@ const getDashboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -165,6 +194,7 @@ const getDashboard = async (req, res) => {
 
 const getAllDoctors = async (req, res) => {
   try {
+
     const doctors = await Doctor.find().select("-password");
 
     res.status(200).json({
@@ -174,12 +204,14 @@ const getAllDoctors = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -187,6 +219,7 @@ const getAllDoctors = async (req, res) => {
 
 const updateDoctor = async (req, res) => {
   try {
+
     const { id } = req.params;
 
     const doctor = await Doctor.findById(id);
@@ -198,23 +231,44 @@ const updateDoctor = async (req, res) => {
       });
     }
 
-    Object.assign(doctor, req.body);
+    const allowedFields = [
+      "name",
+      "email",
+      "specialization",
+      "qualification",
+      "experience",
+      "consultationFee",
+      "phone",
+      "hospital",
+      "availableDays",
+      "availableTime",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        doctor[field] = req.body[field];
+      }
+    });
 
     await doctor.save();
+
+    const updatedDoctor = await Doctor.findById(id).select("-password");
 
     res.status(200).json({
       success: true,
       message: "Doctor Updated Successfully",
-      doctor,
+      doctor: updatedDoctor,
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -222,6 +276,7 @@ const updateDoctor = async (req, res) => {
 
 const deleteDoctor = async (req, res) => {
   try {
+
     const { id } = req.params;
 
     const doctor = await Doctor.findById(id);
@@ -241,12 +296,14 @@ const deleteDoctor = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
 
@@ -254,6 +311,7 @@ const deleteDoctor = async (req, res) => {
 
 const getAllPatients = async (req, res) => {
   try {
+
     const patients = await Patient.find().select("-password");
 
     res.status(200).json({
@@ -263,18 +321,22 @@ const getAllPatients = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
+
 // ====================== DELETE PATIENT ======================
 
 const deletePatient = async (req, res) => {
   try {
+
     const { id } = req.params;
 
     const patient = await Patient.findById(id);
@@ -294,18 +356,22 @@ const deletePatient = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
+
 // ====================== GET ALL APPOINTMENTS ======================
 
 const getAllAppointments = async (req, res) => {
   try {
+
     const appointments = await Appointment.find()
       .populate("patient", "name email")
       .populate("doctor", "name specialization")
@@ -318,18 +384,22 @@ const getAllAppointments = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
+
 // ====================== GET ALL AI REPORTS ======================
 
 const getAllAIReports = async (req, res) => {
   try {
+
     const reports = await AIReport.find()
       .populate("patient", "name email")
       .sort({ createdAt: -1 });
@@ -341,14 +411,17 @@ const getAllAIReports = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
+
   }
 };
+
 // ====================== EXPORT ======================
 
 module.exports = {

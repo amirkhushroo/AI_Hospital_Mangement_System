@@ -6,7 +6,6 @@ const Doctor = require("../models/Doctor");
 
 const bookAppointment = async (req, res) => {
   try {
-
     const {
       doctorId,
       appointmentDate,
@@ -14,7 +13,8 @@ const bookAppointment = async (req, res) => {
       symptoms,
     } = req.body;
 
-    // Validate Input
+    // ====================== Validate Input ======================
+
     if (!doctorId || !appointmentDate || !appointmentTime) {
       return res.status(400).json({
         success: false,
@@ -22,7 +22,36 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // Check Patient
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT Secret is not configured",
+      });
+    }
+
+    // Validate Appointment Date
+    const selectedDate = new Date(appointmentDate);
+
+    if (isNaN(selectedDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid appointment date",
+      });
+    }
+
+    // Prevent Past Appointments
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment date cannot be in the past",
+      });
+    }
+
+    // ====================== Check Patient ======================
+
     const patient = await Patient.findById(req.user.id);
 
     if (!patient) {
@@ -32,7 +61,8 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // Check Doctor
+    // ====================== Check Doctor ======================
+
     const doctor = await Doctor.findById(doctorId);
 
     if (!doctor) {
@@ -42,7 +72,41 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // Prevent Duplicate Appointment
+    // ====================== Check Doctor Availability Day ======================
+
+    const dayName = selectedDate.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+
+    if (
+      doctor.availableDays &&
+      doctor.availableDays.length > 0 &&
+      !doctor.availableDays.includes(dayName)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Doctor is not available on this day",
+      });
+    }
+
+    // ====================== Check Doctor Availability Time ======================
+
+    if (
+      doctor.availableTime?.start &&
+      doctor.availableTime?.end &&
+      (
+        appointmentTime < doctor.availableTime.start ||
+        appointmentTime > doctor.availableTime.end
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Selected time is outside doctor's working hours",
+      });
+    }
+
+    // ====================== Prevent Duplicate Appointment ======================
+
     const existingAppointment = await Appointment.findOne({
       patient: patient._id,
       doctor: doctor._id,
@@ -58,13 +122,14 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // Create Appointment
+    // ====================== Create Appointment ======================
+
     const appointment = await Appointment.create({
       patient: patient._id,
       doctor: doctor._id,
       appointmentDate,
       appointmentTime,
-      symptoms,
+      symptoms: symptoms?.trim() || "",
       status: "Pending",
     });
 
@@ -85,11 +150,18 @@ const bookAppointment = async (req, res) => {
 
   } catch (error) {
 
-    console.log(error);
+    console.error(error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "This appointment slot is already booked.",
+      });
+    }
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
 
   }
@@ -120,11 +192,11 @@ const getPatientAppointments = async (req, res) => {
 
   } catch (error) {
 
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
 
   }
@@ -155,11 +227,11 @@ const getDoctorAppointments = async (req, res) => {
 
   } catch (error) {
 
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
 
   }
@@ -190,12 +262,12 @@ const updateAppointmentStatus = async (req, res) => {
     }
 
     const allowedStatus = [
-  "Pending",
-  "Accepted",
-  "Rejected",
-  "Completed",
-  "Cancelled",
-];
+      "Pending",
+      "Accepted",
+      "Rejected",
+      "Completed",
+      "Cancelled",
+    ];
 
     if (!allowedStatus.includes(status)) {
       return res.status(400).json({
@@ -206,32 +278,32 @@ const updateAppointmentStatus = async (req, res) => {
 
     appointment.status = status;
 
-if (notes) {
-  appointment.notes = notes;
-}
+    if (notes !== undefined) {
+      appointment.notes = notes.trim();
+    }
 
-await appointment.save();
+    await appointment.save();
 
-const updatedAppointment = await Appointment.findById(appointment._id)
-  .populate("patient", "name email phone age gender")
-  .populate(
-    "doctor",
-    "name specialization qualification hospital consultationFee"
-  );
+    const updatedAppointment = await Appointment.findById(appointment._id)
+      .populate("patient", "name email phone age gender")
+      .populate(
+        "doctor",
+        "name specialization qualification hospital consultationFee"
+      );
 
-res.status(200).json({
-  success: true,
-  message: `Appointment ${status} Successfully`,
-  appointment: updatedAppointment,
-});
+    res.status(200).json({
+      success: true,
+      message: `Appointment ${status} Successfully`,
+      appointment: updatedAppointment,
+    });
 
   } catch (error) {
 
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
 
   }
@@ -282,11 +354,11 @@ const cancelAppointment = async (req, res) => {
 
   } catch (error) {
 
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal Server Error",
     });
 
   }

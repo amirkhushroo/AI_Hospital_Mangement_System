@@ -6,22 +6,27 @@ const ai = new GoogleGenAI({
 
 const analyzeSymptoms = async (symptoms) => {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured.");
+    }
+
+    const cleanedSymptoms = symptoms.trim();
 
     const prompt = `
 You are an experienced medical AI assistant.
 
-Analyze the patient's symptoms carefully.
+Analyze the patient's symptoms carefully and return ONLY a valid JSON object.
 
 Patient Symptoms:
-${symptoms}
-
-Return ONLY a valid JSON object.
+${cleanedSymptoms}
 
 Rules:
-- Do not return markdown.
-- Do not use \`\`\`json
-- Do not explain anything.
-- Return JSON only.
+1. Return ONLY valid JSON.
+2. Do NOT return markdown.
+3. Do NOT use \`\`\`json or \`\`\`.
+4. Do NOT explain anything.
+5. Every field must be present.
+6. Arrays must always be arrays, even if empty.
 
 JSON Format:
 
@@ -41,18 +46,15 @@ JSON Format:
 }
 
 Severity must be one of:
-
 Low
 Moderate
 High
 Critical
 
-Confidence should be like:
-
+Confidence example:
 90%
 
-Emergency must be either:
-
+Emergency must be:
 true
 false
 `;
@@ -62,11 +64,23 @@ false
       contents: prompt,
     });
 
-    return response.text;
+    let result = response.text;
 
+    if (!result) {
+      throw new Error("Empty response received from Gemini.");
+    }
+
+    // Remove accidental Markdown formatting
+    result = result
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    return result;
   } catch (error) {
-    console.log(error);
-    throw error;
+    console.error("Gemini Service Error:", error);
+
+    throw new Error("Failed to analyze symptoms using AI.");
   }
 };
 
