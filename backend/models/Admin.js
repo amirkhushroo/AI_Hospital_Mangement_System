@@ -5,59 +5,50 @@ const adminSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Admin name is required"],
+      required: true,
       trim: true,
-      minlength: [2, "Name must be at least 2 characters"],
-      maxlength: [100, "Name cannot exceed 100 characters"],
     },
 
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
       trim: true,
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
 
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
+      required: true,
+      minlength: 6,
       select: false,
+    },
+
+    lastLogin: {
+      type: Date,
+      default: null,
     },
   },
   {
     timestamps: true,
-    versionKey: false,
   }
 );
 
-// ====================== HASH PASSWORD ======================
+/// ====================== HASH PASSWORD ======================
 
-adminSchema.pre("save", async function (next) {
-  try {
-    if (!this.isModified("password")) {
-      return next();
-    }
+adminSchema.pre("save", async function () {
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-
-    next();
-  } catch (error) {
-    next(error);
+  if (!this.isModified("password")) {
+    return;
   }
-});
 
+  this.password = await bcrypt.hash(this.password, 10);
+
+});
 // ====================== COMPARE PASSWORD ======================
 
-adminSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+adminSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
 
-// ====================== EXPORT MODEL ======================
-
-const Admin = mongoose.model("Admin", adminSchema);
-
-module.exports = Admin;
+module.exports = mongoose.model("Admin", adminSchema);

@@ -9,6 +9,7 @@ import NotFound from "../pages/common/NotFound";
 // ====================== Patient ======================
 import PatientLogin from "../pages/patient/Login";
 import PatientRegister from "../pages/patient/Register";
+import VerifyRegistrationOTP from "../pages/patient/VerifyRegistrationOTP";
 import PatientDashboard from "../pages/patient/Dashboard";
 import PatientProfile from "../pages/patient/Profile";
 import Appointment from "../pages/patient/Appointment";
@@ -31,22 +32,34 @@ import AdminPatients from "../pages/Admin/Patients";
 import AdminAppointments from "../pages/Admin/Appointments";
 import AdminReports from "../pages/Admin/Reports";
 
+// ====================== Operator ======================
+import OperatorLogin from "../pages/operator/OperatorLogin";
+import OperatorDashboard from "../pages/operator/OperatorDashboard";
+import AppointmentList from "../pages/operator/AppointmentList";
+import RegisterPatient from "../pages/operator/RegisterPatient";
+import BookAppointment from "../pages/operator/BookAppointment";
+import PatientManagement from "../pages/operator/PatientManagement";
+import DoctorAvailability from "../pages/operator/DoctorAvailability";
+import UploadReports from "../pages/operator/UploadReports";
+import Profile from "../pages/operator/Profile";
 function AppRoutes() {
-
   return (
-
     <Routes>
-
-
       {/* ====================== Common ====================== */}
 
-<Route path="/" element={<Home />} />
-<Route path="/about" element={<About />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
 
       {/* ====================== Patient ====================== */}
 
       <Route path="/patient/login" element={<PatientLogin />} />
       <Route path="/patient/register" element={<PatientRegister />} />
+
+      <Route
+        path="/patient/verify-registration-otp"
+        element={<VerifyRegistrationOTP />}
+      />
+
       <Route
         path="/patient/dashboard"
         element={
@@ -55,6 +68,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/patient/profile"
         element={
@@ -63,6 +77,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/patient/appointment"
         element={
@@ -71,6 +86,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/patient/my-appointments"
         element={
@@ -79,6 +95,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/patient/medical-records"
         element={
@@ -87,6 +104,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/patient/symptom-checker"
         element={
@@ -99,6 +117,7 @@ function AppRoutes() {
       {/* ====================== Doctor ====================== */}
 
       <Route path="/doctor/login" element={<DoctorLogin />} />
+
       <Route
         path="/doctor/dashboard"
         element={
@@ -107,6 +126,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/doctor/profile"
         element={
@@ -115,6 +135,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/doctor/appointments"
         element={
@@ -123,6 +144,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/doctor/patients"
         element={
@@ -135,6 +157,7 @@ function AppRoutes() {
       {/* ====================== Admin ====================== */}
 
       <Route path="/admin/login" element={<AdminLogin />} />
+
       <Route
         path="/admin/dashboard"
         element={
@@ -143,6 +166,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/doctors"
         element={
@@ -151,6 +175,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/patients"
         element={
@@ -159,6 +184,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/appointments"
         element={
@@ -167,6 +193,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/reports"
         element={
@@ -176,14 +203,87 @@ function AppRoutes() {
         }
       />
 
+      {/* ====================== Operator ====================== */}
+
+<Route path="/operator/login" element={<OperatorLogin />} />
+
+<Route
+  path="/operator/dashboard"
+  element={
+    <ProtectedRoute role="operator">
+      <OperatorDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/register-patient"
+  element={
+    <ProtectedRoute role="operator">
+      <RegisterPatient />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/book-appointment"
+  element={
+    <ProtectedRoute role="operator">
+      <BookAppointment />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/appointments"
+  element={
+    <ProtectedRoute role="operator">
+      <AppointmentList />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/patients"
+  element={
+    <ProtectedRoute role="operator">
+      <PatientManagement />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/doctor-availability"
+  element={
+    <ProtectedRoute role="operator">
+      <DoctorAvailability />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/upload-report"
+  element={
+    <ProtectedRoute role="operator">
+      <UploadReports />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/operator/profile"
+  element={
+    <ProtectedRoute role="operator">
+      <Profile />
+    </ProtectedRoute>
+  }
+/>
+
       {/* ====================== 404 ====================== */}
 
       <Route path="*" element={<NotFound />} />
-
     </Routes>
-
   );
-
 }
 
 export default AppRoutes;

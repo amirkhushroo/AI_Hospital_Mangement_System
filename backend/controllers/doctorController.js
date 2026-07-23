@@ -20,8 +20,7 @@ const registerDoctor = async (req, res) => {
       availableTime,
     } = req.body;
 
-    // ====================== Validation ======================
-
+    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -29,24 +28,13 @@ const registerDoctor = async (req, res) => {
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT Secret is not configured",
-      });
-    }
-
-    // ====================== Normalize Input ======================
-
+    // Normalize Input
     name = name.trim();
     email = email.trim().toLowerCase();
-    password = password.trim();
     specialization = specialization?.trim();
     qualification = qualification?.trim();
     phone = phone?.trim();
     hospital = hospital?.trim();
-
-    // ====================== Check Existing Doctor ======================
 
     const existingDoctor = await Doctor.findOne({ email });
 
@@ -57,11 +45,8 @@ const registerDoctor = async (req, res) => {
       });
     }
 
-    // ====================== Hash Password ======================
-
+    // Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // ====================== Create Doctor ======================
 
     const doctor = await Doctor.create({
       name,
@@ -76,8 +61,6 @@ const registerDoctor = async (req, res) => {
       availableDays,
       availableTime,
     });
-
-    // ====================== Generate Token ======================
 
     const token = jwt.sign(
       { id: doctor._id },
@@ -97,14 +80,12 @@ const registerDoctor = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
-
   }
 };
 
@@ -112,10 +93,7 @@ const registerDoctor = async (req, res) => {
 
 const loginDoctor = async (req, res) => {
   try {
-
     let { email, password } = req.body;
-
-    // ====================== Validation ======================
 
     if (!email || !password) {
       return res.status(400).json({
@@ -124,19 +102,7 @@ const loginDoctor = async (req, res) => {
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT Secret is not configured",
-      });
-    }
-
-    // ====================== Normalize Input ======================
-
     email = email.trim().toLowerCase();
-    password = password.trim();
-
-    // ====================== Find Doctor ======================
 
     const doctor = await Doctor.findOne({ email });
 
@@ -147,8 +113,6 @@ const loginDoctor = async (req, res) => {
       });
     }
 
-    // ====================== Compare Password ======================
-
     const isMatch = await bcrypt.compare(password, doctor.password);
 
     if (!isMatch) {
@@ -157,8 +121,6 @@ const loginDoctor = async (req, res) => {
         message: "Invalid Password",
       });
     }
-
-    // ====================== Generate Token ======================
 
     const token = jwt.sign(
       { id: doctor._id },
@@ -178,14 +140,12 @@ const loginDoctor = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
-
   }
 };
 
@@ -204,11 +164,11 @@ const getAllDoctors = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }
@@ -235,11 +195,11 @@ const getDoctorProfile = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }
@@ -293,11 +253,11 @@ const updateDoctorProfile = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }

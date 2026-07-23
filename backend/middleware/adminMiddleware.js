@@ -13,21 +13,11 @@ const adminMiddleware = async (req, res, next) => {
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT Secret is not configured.",
-      });
-    }
-
     const token = authHeader.startsWith("Bearer ")
       ? authHeader.slice(7)
       : authHeader;
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const admin = await Admin.findById(decoded.id).select("-password");
 
@@ -44,25 +34,11 @@ const adminMiddleware = async (req, res, next) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Admin Middleware Error:", error);
 
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        message: "Admin token has expired.",
-      });
-    }
-
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid Admin Token.",
-      });
-    }
-
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
-      message: "Authentication Failed.",
+      message: "Invalid or Expired Admin Token",
     });
 
   }

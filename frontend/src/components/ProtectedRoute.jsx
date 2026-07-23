@@ -4,22 +4,50 @@ function ProtectedRoute({ children, role = "patient" }) {
   const location = useLocation();
 
   const getToken = () => {
-    if (role === "admin") return localStorage.getItem("adminToken");
-    if (role === "doctor") return localStorage.getItem("doctorToken");
-    return localStorage.getItem("token");
+    switch (role) {
+      case "admin":
+        return localStorage.getItem("adminToken");
+
+      case "doctor":
+        return localStorage.getItem("doctorToken");
+
+      case "operator":
+        return localStorage.getItem("operatorToken");
+
+      default:
+        return localStorage.getItem("token");
+    }
   };
 
   const token = getToken();
 
   if (!token) {
-    const redirectPath =
-      role === "admin"
-        ? "/admin/login"
-        : role === "doctor"
-          ? "/doctor/login"
-          : "/patient/login";
+    let redirectPath = "/patient/login";
 
-    return <Navigate to={redirectPath} replace state={{ from: location }} />;
+    switch (role) {
+      case "admin":
+        redirectPath = "/admin/login";
+        break;
+
+      case "doctor":
+        redirectPath = "/doctor/login";
+        break;
+
+      case "operator":
+        redirectPath = "/operator/login";
+        break;
+
+      default:
+        redirectPath = "/patient/login";
+    }
+
+    return (
+      <Navigate
+        to={redirectPath}
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
   return children;

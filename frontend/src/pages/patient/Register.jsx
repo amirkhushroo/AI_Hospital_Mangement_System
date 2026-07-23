@@ -11,37 +11,59 @@ function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     age: "",
     gender: "",
-    phone: "",
     address: "",
   });
 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    // ================= Validation =================
+
+    if (!formData.email && !formData.phone) {
+      toast.error("Please enter either Email or Mobile Number.");
+      return;
+    }
+
+    if (formData.email && formData.phone) {
+      toast.error("Register using either Email or Mobile Number, not both.");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const response = await api.post(
-        "/patient/register",
-        formData
-      );
+      const response = await api.post("/patient/register", formData);
 
       if (response.data.success) {
-        toast.success("Registration Successful");
+        toast.success(response.data.message);
 
-        navigate("/patient/login");
+        // ================= Email Registration =================
+
+        if (formData.email) {
+          navigate("/patient/login");
+          return;
+        }
+
+        // ================= Phone Registration =================
+
+        navigate("/patient/verify-registration-otp", {
+          state: {
+            phone: formData.phone,
+          },
+        });
       }
     } catch (error) {
       toast.error(
@@ -55,8 +77,11 @@ function Register() {
   return (
     <div className="register-container">
       <div className="register-card">
+        <h1>
+          <Building2 size={22} />
+          AI Hospital
+        </h1>
 
-        <h1><Building2 size={20} /> AI Hospital</h1>
         <h2>Create Patient Account</h2>
 
         <form onSubmit={handleRegister}>
@@ -65,6 +90,7 @@ function Register() {
             type="text"
             name="name"
             placeholder="Full Name"
+            value={formData.name}
             onChange={handleChange}
             required
           />
@@ -72,15 +98,35 @@ function Register() {
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email (Optional)"
+            value={formData.email}
             onChange={handleChange}
-            required
+          />
+
+          <div
+            style={{
+              textAlign: "center",
+              margin: "8px 0",
+              fontWeight: "bold",
+              color: "#666",
+            }}
+          >
+            OR
+          </div>
+
+          <input
+            type="text"
+            name="phone"
+            placeholder="Mobile Number (Optional)"
+            value={formData.phone}
+            onChange={handleChange}
           />
 
           <input
             type="password"
             name="password"
             placeholder="Password"
+            value={formData.password}
             onChange={handleChange}
             required
           />
@@ -89,38 +135,33 @@ function Register() {
             type="number"
             name="age"
             placeholder="Age"
+            value={formData.age}
             onChange={handleChange}
             required
           />
 
           <select
             name="gender"
+            value={formData.gender}
             onChange={handleChange}
             required
           >
             <option value="">Select Gender</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
           </select>
-
-          <input
-            type="text"
-            name="phone"
-            placeholder="Phone Number"
-            onChange={handleChange}
-            required
-          />
 
           <textarea
             name="address"
-            placeholder="Address"
             rows="3"
+            placeholder="Address"
+            value={formData.address}
             onChange={handleChange}
             required
           />
 
-          <button type="submit">
+          <button type="submit" disabled={loading}>
             {loading ? "Registering..." : "Register"}
           </button>
 
@@ -129,9 +170,7 @@ function Register() {
         <div className="login-link">
           <p>
             Already have an account?{" "}
-            <Link to="/patient/login">
-              Login
-            </Link>
+            <Link to="/patient/login">Login</Link>
           </p>
         </div>
 

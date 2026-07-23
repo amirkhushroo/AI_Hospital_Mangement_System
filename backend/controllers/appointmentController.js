@@ -7,13 +7,12 @@ const Doctor = require("../models/Doctor");
 const bookAppointment = async (req, res) => {
   try {
     const {
+      patientId,
       doctorId,
       appointmentDate,
       appointmentTime,
       symptoms,
     } = req.body;
-
-    // ====================== Validate Input ======================
 
     if (!doctorId || !appointmentDate || !appointmentTime) {
       return res.status(400).json({
@@ -22,37 +21,24 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT Secret is not configured",
-      });
+    let patient;
+
+    // Patient books their own appointment
+    if (req.user.role === "patient") {
+      patient = await Patient.findById(req.user.id);
     }
 
-    // Validate Appointment Date
-    const selectedDate = new Date(appointmentDate);
+    // Operator books for any patient
+    else if (req.user.role === "operator") {
+      if (!patientId) {
+        return res.status(400).json({
+          success: false,
+          message: "Patient ID is required",
+        });
+      }
 
-    if (isNaN(selectedDate.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid appointment date",
-      });
+      patient = await Patient.findById(patientId);
     }
-
-    // Prevent Past Appointments
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate < today) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment date cannot be in the past",
-      });
-    }
-
-    // ====================== Check Patient ======================
-
-    const patient = await Patient.findById(req.user.id);
 
     if (!patient) {
       return res.status(404).json({
@@ -60,8 +46,6 @@ const bookAppointment = async (req, res) => {
         message: "Patient not found",
       });
     }
-
-    // ====================== Check Doctor ======================
 
     const doctor = await Doctor.findById(doctorId);
 
@@ -72,41 +56,7 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // ====================== Check Doctor Availability Day ======================
-
-    const dayName = selectedDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
-
-    if (
-      doctor.availableDays &&
-      doctor.availableDays.length > 0 &&
-      !doctor.availableDays.includes(dayName)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Doctor is not available on this day",
-      });
-    }
-
-    // ====================== Check Doctor Availability Time ======================
-
-    if (
-      doctor.availableTime?.start &&
-      doctor.availableTime?.end &&
-      (
-        appointmentTime < doctor.availableTime.start ||
-        appointmentTime > doctor.availableTime.end
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Selected time is outside doctor's working hours",
-      });
-    }
-
-    // ====================== Prevent Duplicate Appointment ======================
-
+    // Prevent duplicate appointment
     const existingAppointment = await Appointment.findOne({
       patient: patient._id,
       doctor: doctor._id,
@@ -122,14 +72,12 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // ====================== Create Appointment ======================
-
     const appointment = await Appointment.create({
       patient: patient._id,
       doctor: doctor._id,
       appointmentDate,
       appointmentTime,
-      symptoms: symptoms?.trim() || "",
+      symptoms,
       status: "Pending",
     });
 
@@ -149,21 +97,12 @@ const bookAppointment = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.error(error);
-
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: "This appointment slot is already booked.",
-      });
-    }
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
-
   }
 };
 
@@ -192,16 +131,15 @@ const getPatientAppointments = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }
 };
-
 // ====================== GET DOCTOR APPOINTMENTS ======================
 
 const getDoctorAppointments = async (req, res) => {
@@ -227,11 +165,11 @@ const getDoctorAppointments = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }
@@ -254,7 +192,22 @@ const updateAppointmentStatus = async (req, res) => {
       });
     }
 
-    if (appointment.doctor.toString() !== req.user.id) {
+    // Doctor can update only their own appointments
+    if (
+      req.user.role === "doctor" &&
+      appointment.doctor.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Operator can update any appointment
+    if (
+      req.user.role !== "doctor" &&
+      req.user.role !== "operator"
+    ) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized",
@@ -278,13 +231,15 @@ const updateAppointmentStatus = async (req, res) => {
 
     appointment.status = status;
 
-    if (notes !== undefined) {
-      appointment.notes = notes.trim();
+    if (notes) {
+      appointment.notes = notes;
     }
 
     await appointment.save();
 
-    const updatedAppointment = await Appointment.findById(appointment._id)
+    const updatedAppointment = await Appointment.findById(
+      appointment._id
+    )
       .populate("patient", "name email phone age gender")
       .populate(
         "doctor",
@@ -299,16 +254,15 @@ const updateAppointmentStatus = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }
 };
-
 // ====================== CANCEL APPOINTMENT ======================
 
 const cancelAppointment = async (req, res) => {
@@ -325,9 +279,33 @@ const cancelAppointment = async (req, res) => {
       });
     }
 
+    // Patient can cancel only their own appointment
     if (
-      appointment.patient.toString() !== req.user.id &&
+      req.user.role === "patient" &&
+      appointment.patient.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Doctor can cancel only their own appointment
+    if (
+      req.user.role === "doctor" &&
       appointment.doctor.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Operator can cancel any appointment
+    if (
+      req.user.role !== "patient" &&
+      req.user.role !== "doctor" &&
+      req.user.role !== "operator"
     ) {
       return res.status(403).json({
         success: false,
@@ -354,20 +332,135 @@ const cancelAppointment = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.log(error);
 
     res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: error.message,
     });
 
   }
 };
 
+// ====================== RESCHEDULE APPOINTMENT ======================
+
+const rescheduleAppointment = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+    const { appointmentDate, appointmentTime } = req.body;
+
+    if (!appointmentDate || !appointmentTime) {
+      return res.status(400).json({
+        success: false,
+        message: "Date and Time are required",
+      });
+    }
+
+    const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    // Only Operator can reschedule
+    if (req.user.role !== "operator") {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Check if another appointment already exists
+    const existingAppointment = await Appointment.findOne({
+      _id: { $ne: appointment._id },
+      doctor: appointment.doctor,
+      appointmentDate,
+      appointmentTime,
+      status: { $ne: "Cancelled" },
+    });
+
+    if (existingAppointment) {
+      return res.status(400).json({
+        success: false,
+        message: "This time slot is already booked.",
+      });
+    }
+
+    appointment.appointmentDate = appointmentDate;
+    appointment.appointmentTime = appointmentTime;
+
+    await appointment.save();
+
+    const updatedAppointment = await Appointment.findById(id)
+      .populate("patient", "name email phone")
+      .populate("doctor", "name specialization");
+
+    res.status(200).json({
+      success: true,
+      message: "Appointment Rescheduled Successfully",
+      appointment: updatedAppointment,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+// ====================== GET ALL APPOINTMENTS ======================
+
+const getAllAppointments = async (req, res) => {
+  try {
+
+    const appointments = await Appointment.find()
+      .populate(
+        "patient",
+        "name email phone age gender address"
+      )
+      .populate(
+        "doctor",
+        "name specialization qualification consultationFee"
+      )
+      .sort({
+        appointmentDate: 1,
+        appointmentTime: 1,
+      });
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      appointments,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+// ====================== EXPORTS ======================
+
 module.exports = {
   bookAppointment,
   getPatientAppointments,
   getDoctorAppointments,
+  getAllAppointments,
   updateAppointmentStatus,
   cancelAppointment,
+  rescheduleAppointment,
 };

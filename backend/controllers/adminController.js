@@ -7,40 +7,75 @@ const AIReport = require("../models/AIReport");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const {
+  sendOTP,
+  verifyOTP,
+} = require("../services/otpService");
+
+const {
+  sendNotification,
+} = require("../services/notificationService");
+
+const isEmail = require("../utils/isEmail");
+
 // ====================== CREATE ADMIN ======================
 
 const createAdmin = async (req, res) => {
   try {
-    let { name, email, password } = req.body;
+
+    let {
+      name,
+      email,
+      password,
+    } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "Name, Email and Password are required.",
       });
     }
 
     name = name.trim();
     email = email.trim().toLowerCase();
+    password = password.trim();
+
+    if (!isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email Address.",
+      });
+    }
 
     const existingAdmin = await Admin.findOne({ email });
 
     if (existingAdmin) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
-        message: "Admin already exists",
+        message: "Email already registered.",
       });
     }
 
     const admin = await Admin.create({
-      name,
-      email,
-      password,
-    });
+  name,
+  email,
+  password,
+});
 
-    res.status(201).json({
+    const token = jwt.sign(
+      {
+        id: admin._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    return res.status(201).json({
       success: true,
-      message: "Admin Created Successfully",
+      message: "Admin created successfully.",
+      token,
       admin: {
         id: admin._id,
         name: admin.name,
@@ -50,9 +85,9 @@ const createAdmin = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Create Admin Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -64,61 +99,72 @@ const createAdmin = async (req, res) => {
 
 const adminLogin = async (req, res) => {
   try {
-    let { email, password } = req.body;
+    console.log("Step 1: Login request received");
 
-    if (!email || !password) {
+    let { identifier, password } = req.body;
+    console.log("Request Body:", req.body);
+
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and Password are required",
+        message: "Email and Password are required.",
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT Secret is not configured",
-      });
-    }
+    identifier = identifier.trim().toLowerCase();
+    password = password.trim();
 
-    email = email.trim().toLowerCase();
+    console.log("Step 2: Searching admin...");
 
-    // Fetch admin with password
-    const admin = await Admin.findOne({ email }).select("+password");
+    const admin = await Admin.findOne({
+      email: identifier,
+    }).select("+password");
+
+    console.log("Admin Found:", admin);
 
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: "Admin not found",
+        message: "Admin not found.",
       });
     }
 
-    if (!admin.password) {
-      return res.status(500).json({
-        success: false,
-        message: "Admin password is missing from database.",
-      });
-    }
+    console.log("Stored Password:", admin.password);
 
-    const isMatch = await bcrypt.compare(password, admin.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      admin.password
+    );
+
+    console.log("Password Match:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid Email or Password",
+        message: "Invalid Email or Password.",
       });
     }
 
+    admin.lastLogin = new Date();
+    await admin.save();
+
+    console.log("Step 3: Password verified");
+
     const token = jwt.sign(
-      { id: admin._id },
+      {
+        id: admin._id,
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
       }
     );
 
-    res.status(200).json({
+    console.log("Step 4: Token generated");
+
+    return res.status(200).json({
       success: true,
-      message: "Admin Login Successful",
+      message: "Admin Login Successful.",
       token,
       admin: {
         id: admin._id,
@@ -126,13 +172,186 @@ const adminLogin = async (req, res) => {
         email: admin.email,
       },
     });
-  } catch (error) {
-    console.error("Admin Login Error:", error);
 
-    res.status(500).json({
+  } catch (error) {
+    console.error("============== LOGIN ERROR ==============");
+    console.error(error);
+    console.error(error.stack);
+    console.error("=========================================");
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// ====================== FORGOT PASSWORD ======================
+
+const forgotPassword = async (req, res) => {
+  try {
+
+    let { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required.",
+      });
+    }
+
+    email = email.trim().toLowerCase();
+
+    if (!isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email Address.",
+      });
+    }
+
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found.",
+      });
+    }
+
+    await sendOTP({
+      identifier: email,
+      role: "admin",
+      purpose: "FORGOT_PASSWORD",
+      channel: "email",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Forgot Password Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
+
+  }
+};
+
+// ====================== VERIFY FORGOT PASSWORD OTP ======================
+
+const verifyForgotPasswordOTP = async (req, res) => {
+  try {
+
+    let { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required.",
+      });
+    }
+
+    email = email.trim().toLowerCase();
+
+    const result = await verifyOTP({
+      identifier: email,
+      otp,
+      purpose: "FORGOT_PASSWORD",
+    });
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Verify Forgot Password OTP Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// ====================== RESET PASSWORD ======================
+
+const resetPassword = async (req, res) => {
+  try {
+
+    let {
+      email,
+      newPassword,
+      confirmPassword,
+    } = req.body;
+
+    if (!email || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email, New Password and Confirm Password are required.",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match.",
+      });
+    }
+
+    email = email.trim().toLowerCase();
+
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found.",
+      });
+    }
+
+    admin.password = newPassword;
+
+await admin.save();
+
+    await sendNotification({
+      userId: admin._id,
+      userModel: "Admin",
+      recipient: admin.email,
+      channel: "email",
+      title: "Password Changed Successfully",
+      message: "Your password has been changed successfully.",
+      type: "FORGOT_PASSWORD",
+      html: `
+        <h2>Password Updated</h2>
+        <p>Your password has been changed successfully.</p>
+      `,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Reset Password Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
   }
 };
 
@@ -141,16 +360,25 @@ const adminLogin = async (req, res) => {
 const getAdminProfile = async (req, res) => {
   try {
 
-    res.status(200).json({
+    const admin = await Admin.findById(req.admin._id).select("-password");
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found.",
+      });
+    }
+
+    return res.status(200).json({
       success: true,
-      admin: req.admin,
+      admin,
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get Admin Profile Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -163,26 +391,54 @@ const getAdminProfile = async (req, res) => {
 const getDashboard = async (req, res) => {
   try {
 
-    const totalPatients = await Patient.countDocuments();
-    const totalDoctors = await Doctor.countDocuments();
-    const totalAppointments = await Appointment.countDocuments();
-    const totalAIReports = await AIReport.countDocuments();
+    const [
+      totalDoctors,
+      totalPatients,
+      totalAppointments,
+      totalAIReports,
+      pendingAppointments,
+      confirmedAppointments,
+      completedAppointments,
+      cancelledAppointments,
+    ] = await Promise.all([
+      Doctor.countDocuments(),
+      Patient.countDocuments(),
+      Appointment.countDocuments(),
+      AIReport.countDocuments(),
+      Appointment.countDocuments({ status: "Pending" }),
+      Appointment.countDocuments({ status: "Confirmed" }),
+      Appointment.countDocuments({ status: "Completed" }),
+      Appointment.countDocuments({ status: "Cancelled" }),
+    ]);
 
-    res.status(200).json({
+    const recentAppointments = await Appointment.find()
+      .populate("patient", "name")
+      .populate("doctor", "name specialization")
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    return res.status(200).json({
       success: true,
       dashboard: {
-        totalPatients,
         totalDoctors,
+        totalPatients,
         totalAppointments,
         totalAIReports,
+        appointments: {
+          pending: pendingAppointments,
+          confirmed: confirmedAppointments,
+          completed: completedAppointments,
+          cancelled: cancelledAppointments,
+        },
+        recentAppointments,
       },
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get Dashboard Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -197,7 +453,7 @@ const getAllDoctors = async (req, res) => {
 
     const doctors = await Doctor.find().select("-password");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: doctors.length,
       doctors,
@@ -205,9 +461,9 @@ const getAllDoctors = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get All Doctors Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -227,44 +483,47 @@ const updateDoctor = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({
         success: false,
-        message: "Doctor not found",
+        message: "Doctor not found.",
       });
     }
 
-    const allowedFields = [
-      "name",
-      "email",
-      "specialization",
-      "qualification",
-      "experience",
-      "consultationFee",
-      "phone",
-      "hospital",
-      "availableDays",
-      "availableTime",
-    ];
+    const {
+      name,
+      specialization,
+      qualification,
+      experience,
+      consultationFee,
+      phone,
+      address,
+      availableDays,
+      availableTime,
+      status,
+    } = req.body;
 
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        doctor[field] = req.body[field];
-      }
-    });
+    if (name !== undefined) doctor.name = name;
+    if (specialization !== undefined) doctor.specialization = specialization;
+    if (qualification !== undefined) doctor.qualification = qualification;
+    if (experience !== undefined) doctor.experience = experience;
+    if (consultationFee !== undefined) doctor.consultationFee = consultationFee;
+    if (phone !== undefined) doctor.phone = phone;
+    if (address !== undefined) doctor.address = address;
+    if (availableDays !== undefined) doctor.availableDays = availableDays;
+    if (availableTime !== undefined) doctor.availableTime = availableTime;
+    if (status !== undefined) doctor.status = status;
 
     await doctor.save();
 
-    const updatedDoctor = await Doctor.findById(id).select("-password");
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Doctor Updated Successfully",
-      doctor: updatedDoctor,
+      message: "Doctor updated successfully.",
+      doctor,
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Update Doctor Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -284,29 +543,28 @@ const deleteDoctor = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({
         success: false,
-        message: "Doctor not found",
+        message: "Doctor not found.",
       });
     }
 
     await Doctor.findByIdAndDelete(id);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Doctor Deleted Successfully",
+      message: "Doctor deleted successfully.",
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Delete Doctor Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
 
   }
 };
-
 // ====================== GET ALL PATIENTS ======================
 
 const getAllPatients = async (req, res) => {
@@ -314,7 +572,7 @@ const getAllPatients = async (req, res) => {
 
     const patients = await Patient.find().select("-password");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: patients.length,
       patients,
@@ -322,9 +580,9 @@ const getAllPatients = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get All Patients Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -344,22 +602,30 @@ const deletePatient = async (req, res) => {
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: "Patient not found",
+        message: "Patient not found.",
       });
     }
 
+    await Appointment.deleteMany({
+      patient: patient._id,
+    });
+
+    await AIReport.deleteMany({
+      patient: patient._id,
+    });
+
     await Patient.findByIdAndDelete(id);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Patient Deleted Successfully",
+      message: "Patient and related records deleted successfully.",
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Delete Patient Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -373,11 +639,11 @@ const getAllAppointments = async (req, res) => {
   try {
 
     const appointments = await Appointment.find()
-      .populate("patient", "name email")
+      .populate("patient", "name email phone")
       .populate("doctor", "name specialization")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: appointments.length,
       appointments,
@@ -385,9 +651,9 @@ const getAllAppointments = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get All Appointments Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -401,10 +667,9 @@ const getAllAIReports = async (req, res) => {
   try {
 
     const reports = await AIReport.find()
-      .populate("patient", "name email")
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({
+  .populate("patient", "name email phone")
+  .sort({ createdAt: -1 });
+    return res.status(200).json({
       success: true,
       count: reports.length,
       reports,
@@ -412,9 +677,9 @@ const getAllAIReports = async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get All AI Reports Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -422,18 +687,37 @@ const getAllAIReports = async (req, res) => {
   }
 };
 
-// ====================== EXPORT ======================
+// ====================== EXPORTS ======================
 
 module.exports = {
+
+  // Authentication
   createAdmin,
   adminLogin,
+  forgotPassword,
+  verifyForgotPasswordOTP,
+  resetPassword,
+
+  // Profile
   getAdminProfile,
+
+  // Dashboard
   getDashboard,
+
+  // Doctor Management
   getAllDoctors,
   updateDoctor,
   deleteDoctor,
+
+  // Patient Management
   getAllPatients,
   deletePatient,
+
+  // Appointment Management
   getAllAppointments,
+
+  // AI Report Management
   getAllAIReports,
+
 };
+

@@ -13,7 +13,11 @@ const LiquidChrome = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    const renderer = new Renderer({ antialias: true, dpr: Math.min(window.devicePixelRatio, 2) });
+    const renderer = new Renderer({
+      antialias: true,
+      dpr: Math.min(window.devicePixelRatio, 2),
+    });
+
     const gl = renderer.gl;
     gl.clearColor(1, 1, 1, 1);
 
@@ -21,14 +25,16 @@ const LiquidChrome = () => {
       attribute vec2 position;
       attribute vec2 uv;
       varying vec2 vUv;
+
       void main() {
         vUv = uv;
-        gl_Position = vec4(position, 0.0, 1.0);
+        gl_Position = vec4(position,0.0,1.0);
       }
     `;
 
     const fragment = `
       precision highp float;
+
       uniform float uTime;
       uniform vec3 uResolution;
       uniform vec3 uBaseColor;
@@ -36,42 +42,68 @@ const LiquidChrome = () => {
       uniform float uFrequencyX;
       uniform float uFrequencyY;
       uniform vec2 uMouse;
+
       varying vec2 vUv;
 
-      vec4 renderImage(vec2 uvCoord) {
-          vec2 fragCoord = uvCoord * uResolution.xy;
-          vec2 uv = (2.0 * fragCoord - uResolution.xy) / min(uResolution.x, uResolution.y);
+      vec4 renderImage(vec2 uvCoord){
 
-          for (float i = 1.0; i < 10.0; i++){
-              uv.x += uAmplitude / i * cos(i * uFrequencyX * uv.y + uTime + uMouse.x * 3.14159);
-              uv.y += uAmplitude / i * cos(i * uFrequencyY * uv.x + uTime + uMouse.y * 3.14159);
+          vec2 fragCoord = uvCoord * uResolution.xy;
+
+          vec2 uv = (2.0 * fragCoord - uResolution.xy)
+                    / min(uResolution.x,uResolution.y);
+
+          for(float i=1.0;i<10.0;i++){
+
+              uv.x += uAmplitude/i*cos(i*uFrequencyX*uv.y+uTime+uMouse.x*3.14159);
+
+              uv.y += uAmplitude/i*cos(i*uFrequencyY*uv.x+uTime+uMouse.y*3.14159);
+
           }
 
-          vec2 diff = (uvCoord - uMouse);
-          float dist = length(diff);
-          float falloff = exp(-dist * 20.0);
-          float ripple = sin(10.0 * dist - uTime * 2.0) * 0.03;
-          uv += (diff / (dist + 0.0001)) * ripple * falloff;
+          vec2 diff = uvCoord-uMouse;
 
-          vec3 color = uBaseColor / abs(sin(uTime - uv.y - uv.x));
-          return vec4(color, 1.0);
+          float dist = length(diff);
+
+          float falloff = exp(-dist*20.0);
+
+          float ripple = sin(10.0*dist-uTime*2.0)*0.03;
+
+          uv += (diff/(dist+0.0001))*ripple*falloff;
+
+          vec3 color = uBaseColor/abs(sin(uTime-uv.y-uv.x));
+
+          return vec4(color,1.0);
+
       }
 
-      void main() {
+      void main(){
+
           vec4 col = vec4(0.0);
+
           int samples = 0;
-          for (int i = -1; i <= 1; i++){
-              for (int j = -1; j <= 1; j++){
-                  vec2 offset = vec2(float(i), float(j)) * (1.0 / min(uResolution.x, uResolution.y));
-                  col += renderImage(vUv + offset);
+
+          for(int i=-1;i<=1;i++){
+
+              for(int j=-1;j<=1;j++){
+
+                  vec2 offset = vec2(float(i),float(j))
+                  *(1.0/min(uResolution.x,uResolution.y));
+
+                  col += renderImage(vUv+offset);
+
                   samples++;
+
               }
+
           }
-          gl_FragColor = col / float(samples);
+
+          gl_FragColor = col/float(samples);
+
       }
     `;
 
     const geometry = new Triangle(gl);
+
     const program = new Program(gl, {
       vertex,
       fragment,
@@ -85,106 +117,117 @@ const LiquidChrome = () => {
         uMouse: { value: new Float32Array([0.5, 0.5]) },
       },
     });
-    const mesh = new Mesh(gl, { geometry, program });
+
+    const mesh = new Mesh(gl, {
+      geometry,
+      program,
+    });
 
     const resize = () => {
       renderer.setSize(container.offsetWidth, container.offsetHeight);
+
       const resolution = program.uniforms.uResolution.value;
+
       resolution[0] = gl.canvas.width;
       resolution[1] = gl.canvas.height;
       resolution[2] = gl.canvas.width / gl.canvas.height;
     };
 
-    const updateMouse = (clientX, clientY) => {
+    const updateMouse = (x, y) => {
       const mouse = program.uniforms.uMouse.value;
-      mouse[0] = clientX / window.innerWidth;
-      mouse[1] = 1 - clientY / window.innerHeight;
+
+      mouse[0] = x / window.innerWidth;
+      mouse[1] = 1 - y / window.innerHeight;
     };
 
-    const handleMouseMove = (event) => updateMouse(event.clientX, event.clientY);
-    const handleTouchMove = (event) => {
-      if (event.touches.length > 0) updateMouse(event.touches[0].clientX, event.touches[0].clientY);
-    };
+    const mouseMove = (e) => updateMouse(e.clientX, e.clientY);
 
+    window.addEventListener("mousemove", mouseMove);
     window.addEventListener("resize", resize);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+
     resize();
 
-    let animationId;
-    const update = (time) => {
-      animationId = requestAnimationFrame(update);
-      program.uniforms.uTime.value = time * 0.00085;
+    container.appendChild(gl.canvas);
+
+    let id;
+
+    const animate = (t) => {
+      id = requestAnimationFrame(animate);
+      program.uniforms.uTime.value = t * 0.00085;
       renderer.render({ scene: mesh });
     };
 
-    container.appendChild(gl.canvas);
-    animationId = requestAnimationFrame(update);
+    id = requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      cancelAnimationFrame(id);
+      window.removeEventListener("mousemove", mouseMove);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchmove", handleTouchMove);
-      if (gl.canvas.parentElement) gl.canvas.parentElement.removeChild(gl.canvas);
+
+      if (gl.canvas.parentElement) {
+        gl.canvas.parentElement.removeChild(gl.canvas);
+      }
+
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, []);
 
-  return <div className="liquid-chrome-background" ref={containerRef} aria-hidden="true" />;
+  return (
+    <div className="liquid-chrome-background" ref={containerRef} />
+  );
 };
 
 function Login() {
-
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-
       const response = await api.post("/admin/login", {
-        email,
-        password,
+        identifier: identifier.trim().toLowerCase(),
+        password: password.trim(),
       });
 
-      if (response.data.success) {
+      localStorage.setItem("adminToken", response.data.token);
+      localStorage.setItem(
+        "admin",
+        JSON.stringify(response.data.admin)
+      );
 
-        localStorage.setItem("adminToken", response.data.token);
-        localStorage.setItem("admin", JSON.stringify(response.data.admin));
+      toast.success("Admin Login Successful");
 
-        toast.success("Admin Login Successful");
-
-        navigate("/admin/dashboard");
-
-      }
-
+      navigate("/admin/dashboard");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login Failed");
+      toast.error(
+        error.response?.data?.message || "Login Failed"
+      );
     }
-
   };
 
   return (
     <div className="login-container">
       <LiquidChrome />
-      <div className="login-glass-overlay" aria-hidden="true" />
+
+      <div className="login-glass-overlay"></div>
 
       <div className="login-card">
+        <h1>
+          <Building2 size={20} /> MED-Connect Hospital
+        </h1>
 
-        <h1><Building2 size={20} /> MED-Connect Hospital</h1>
         <h2>Admin Login</h2>
 
         <form onSubmit={handleLogin}>
-
           <input
             type="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter Email Address"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            required
           />
 
           <input
@@ -192,16 +235,14 @@ function Login() {
             placeholder="Enter Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
 
           <button type="submit">
             Login
           </button>
-
         </form>
-
       </div>
-
     </div>
   );
 }

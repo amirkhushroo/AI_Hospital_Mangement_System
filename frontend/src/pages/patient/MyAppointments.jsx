@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, Stethoscope } from "lucide-react";
 import BackButton from "../../components/BackButton";
-import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./MyAppointments.css";
@@ -18,8 +17,6 @@ function MyAppointments() {
 
   const fetchAppointments = async () => {
     try {
-      setLoading(true);
-
       const token = localStorage.getItem("token");
 
       const response = await api.get("/appointment/patient", {
@@ -32,7 +29,6 @@ function MyAppointments() {
         setAppointments(response.data.appointments);
       }
     } catch (error) {
-      console.log(error);
       toast.error("Failed to load appointments");
     } finally {
       setLoading(false);
@@ -61,7 +57,6 @@ function MyAppointments() {
       }
 
     } catch (error) {
-      console.log(error);
       toast.error(
         error.response?.data?.message || "Failed to cancel appointment"
       );
@@ -69,7 +64,12 @@ function MyAppointments() {
   };
 
   if (loading) {
-    return <Loader text="Loading Appointments..." />;
+    return (
+      <div className="appointments-container">
+        <BackButton />
+        <h2>Loading...</h2>
+      </div>
+    );
   }
 
   return (

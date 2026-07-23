@@ -24,6 +24,10 @@
     color:#1565c0;
     margin-bottom:10px;
     font-size:36px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
 }
 
 .register-card h2{
@@ -84,9 +88,63 @@
     transition:.3s;
 }
 
-.register-card button:hover{
+.register-card button:hover:not(:disabled){
     background:#0d47a1;
     transform:translateY(-2px);
+}
+
+.register-card button:disabled{
+    background:#90caf9;
+    cursor:not-allowed;
+    transform:none;
+}
+
+/* ====================== OTP ====================== */
+
+.otp-text{
+    text-align:center;
+    color:#666;
+    margin-bottom:20px;
+    line-height:1.6;
+}
+
+.otp-boxes{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.otp-box{
+    width:50px !important;
+    height:55px;
+    text-align:center;
+    font-size:22px !important;
+    font-weight:bold;
+    border:2px solid #ccc !important;
+    border-radius:10px !important;
+    transition:.3s;
+}
+
+.otp-box:focus{
+    border-color:#1565c0 !important;
+    box-shadow:0 0 8px rgba(21,101,192,.25);
+}
+
+.otp-timer{
+    text-align:center;
+    margin-top:20px;
+    color:#555;
+    font-size:15px;
+}
+
+.otp-timer strong{
+    color:#1565c0;
+}
+
+.resend-btn{
+    width:100%;
+    margin-top:15px;
 }
 
 /* ====================== LOGIN LINK ====================== */
@@ -136,6 +194,12 @@
         font-size:15px;
     }
 
+    .otp-box{
+        width:45px !important;
+        height:50px;
+        font-size:20px !important;
+    }
+
 }
 
 @media(max-width:480px){
@@ -154,6 +218,16 @@
 
     .register-card h2{
         font-size:22px;
+    }
+
+    .otp-boxes{
+        gap:8px;
+    }
+
+    .otp-box{
+        width:40px !important;
+        height:45px;
+        font-size:18px !important;
     }
 
 }

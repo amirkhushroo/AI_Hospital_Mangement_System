@@ -1,3 +1,4 @@
+
 import "./Loader.css";
 
 function Loader({ text = "Loading..." }) {

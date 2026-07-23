@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { Stethoscope, User } from "lucide-react";
 import BackButton from "../../components/BackButton";
-import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
 
 function Patients() {
 
-  const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [search, setSearch] = useState("");
@@ -22,8 +20,6 @@ function Patients() {
   const fetchPatients = async () => {
 
     try {
-
-      setLoading(true);
 
       const token = localStorage.getItem("doctorToken");
 
@@ -49,10 +45,6 @@ function Patients() {
 
       toast.error("Failed to load patients");
 
-    } finally {
-
-      setLoading(false);
-
     }
 
   };
@@ -76,10 +68,6 @@ function Patients() {
     setFilteredPatients(filtered);
 
   };
-
-  if (loading) {
-    return <Loader text="Loading Patients..." />;
-  }
 
   return (
 

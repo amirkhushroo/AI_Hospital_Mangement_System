@@ -10,6 +10,9 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 const {
   createAdmin,
   adminLogin,
+  forgotPassword,
+  verifyForgotPasswordOTP,
+  resetPassword,
   getAdminProfile,
   getDashboard,
   getAllDoctors,
@@ -28,6 +31,15 @@ router.post("/create", createAdmin);
 
 // Admin Login
 router.post("/login", adminLogin);
+
+// Forgot Password (Email OTP)
+router.post("/forgot-password", forgotPassword);
+
+// Verify Forgot Password OTP
+router.post("/verify-forgot-password-otp", verifyForgotPasswordOTP);
+
+// Reset Password
+router.post("/reset-password", resetPassword);
 
 // ====================== Protected Routes ======================
 

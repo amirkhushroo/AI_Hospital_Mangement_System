@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import BackButton from "../../components/BackButton";
-import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
@@ -29,8 +28,6 @@ function Profile() {
   const fetchProfile = async () => {
     try {
 
-      setLoading(true);
-
       const token = localStorage.getItem("token");
 
       const response = await api.get("/patient/profile", {
@@ -44,17 +41,11 @@ function Profile() {
       }
 
     } catch (error) {
-
-      console.log(error);
-
       toast.error(
         error.response?.data?.message || "Failed to load profile"
       );
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
@@ -91,22 +82,21 @@ function Profile() {
       }
 
     } catch (error) {
-
-      console.log(error);
-
       toast.error(
         error.response?.data?.message || "Update Failed"
       );
-
     } finally {
-
       setSaving(false);
-
     }
   };
 
   if (loading) {
-    return <Loader text="Loading Profile..." />;
+    return (
+      <div style={{ padding: "20px" }}>
+        <BackButton />
+        <h2 style={{ textAlign: "center" }}>Loading...</h2>
+      </div>
+    );
   }
 
   return (

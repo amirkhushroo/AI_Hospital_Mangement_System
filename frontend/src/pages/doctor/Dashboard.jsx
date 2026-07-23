@@ -51,7 +51,7 @@ function Dashboard() {
       <div className="welcome-section">
 
         <h2>
-          Welcome {doctor?.name || "Doctor"} <Hand size={18} />
+          Welcome Dr. {doctor?.name || "Doctor"} <Hand size={18} />
         </h2>
 
         <p>

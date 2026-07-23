@@ -2,89 +2,362 @@ const Patient = require("../models/patient");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// ====================== REGISTER PATIENT ======================
+const {
+  sendOTP,
+  verifyOTP,
+} = require("../services/otpService");
+
+const {
+  sendNotification,
+} = require("../services/notificationService");
+
+const isEmail = require("../utils/isEmail");
+const isPhone = require("../utils/isPhone");
 
 const registerPatient = async (req, res) => {
   try {
-    let { name, email, password, age, gender, phone, address } = req.body;
+    let {
+      name,
+      email,
+      phone,
+      password,
+      age,
+      gender,
+      address,
+    } = req.body;
 
     // ====================== Validate Required Fields ======================
 
-    if (!name || !email || !password) {
+    if (!name || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, Email and Password are required",
+        message: "Name and Password are required.",
+      });
+    }
+
+    // Either Email or Phone is required
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide either Email or Mobile Number.",
+      });
+    }
+
+    // Cannot register using both Email and Phone together
+    if (email && phone) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please register using either Email or Mobile Number, not both.",
       });
     }
 
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({
         success: false,
-        message: "JWT Secret is not configured",
+        message: "JWT Secret is not configured.",
       });
     }
 
-    // ====================== Normalize Input ======================
+    // ====================== Normalize Data ======================
 
     name = name.trim();
-    email = email.trim().toLowerCase();
     password = password.trim();
 
-    // ====================== Check Existing Patient ======================
+    if (email) {
+      email = email.trim().toLowerCase();
+    }
 
-    const existingPatient = await Patient.findOne({ email });
+    if (phone) {
+      phone = phone.trim();
+    }
 
-    if (existingPatient) {
-      return res.status(409).json({
+    // ====================== Validate Email ======================
+
+    if (email && !isEmail(email)) {
+      return res.status(400).json({
         success: false,
-        message: "Patient already exists",
+        message: "Invalid Email Address.",
       });
+    }
+
+    // ====================== Validate Mobile ======================
+
+    if (phone && !isPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Mobile Number.",
+      });
+    }
+
+    // ====================== Check Existing Email ======================
+
+    if (email) {
+      const existingEmail = await Patient.findOne({ email });
+
+      if (existingEmail) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already registered.",
+        });
+      }
+    }
+
+    // ====================== Check Existing Mobile ======================
+
+    if (phone) {
+      const existingPhone = await Patient.findOne({ phone });
+
+      if (existingPhone) {
+        return res.status(409).json({
+          success: false,
+          message: "Mobile Number already registered.",
+        });
+      }
     }
 
     // ====================== Hash Password ======================
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+        // ====================== Notification Preference ======================
+
+    let preferredNotification;
+
+    if (email) {
+      preferredNotification = "email";
+    } else {
+      preferredNotification = "sms";
+    }
+
     // ====================== Create Patient ======================
 
-    const patient = await Patient.create({
+    const patientData = {
       name,
-      email,
       password: hashedPassword,
       age,
       gender,
-      phone,
       address,
-    });
+      preferredNotification,
+      isEmailVerified: false,
+      isPhoneVerified: false,
+    };
 
-    // ====================== Generate Token ======================
+    if (email) {
+      patientData.email = email;
+      patientData.isEmailVerified = true; // Email registration doesn't require OTP
+    }
+
+    if (phone) {
+      patientData.phone = phone;
+      patientData.isPhoneVerified = false; // Phone must verify OTP
+    }
+
+    const patient = await Patient.create(patientData);
+
+    // ====================== Registration OTP ======================
+
+    // Send OTP only for Phone Registration
+    if (phone) {
+      await sendOTP({
+        identifier: phone,
+        role: "patient",
+        purpose: "REGISTER",
+        channel: "sms",
+      });
+    }
+
+    // ====================== Welcome Notification ======================
+
+    // Email registration → Welcome email only (No OTP)
+    if (email) {
+      await sendNotification({
+        userId: patient._id,
+        userModel: "Patient",
+        recipient: email,
+        channel: "email",
+        title: "Welcome to AI Hospital Management System",
+        message:
+          "Your account has been created successfully.",
+        type: "GENERAL",
+        html: `
+          <h2>Welcome ${patient.name}</h2>
+          <p>Your account has been created successfully.</p>
+          <p>You can now login using your email and password.</p>
+        `,
+      });
+    }
+
+    // Phone registration → Welcome SMS
+    if (phone) {
+      await sendNotification({
+        userId: patient._id,
+        userModel: "Patient",
+        recipient: phone,
+        channel: "sms",
+        title: "Welcome",
+        message:
+          "Welcome to AI Hospital Management System. Please verify the OTP sent to your mobile.",
+        type: "GENERAL",
+      });
+    }
+
+        // ====================== Generate Token ======================
 
     const token = jwt.sign(
-      { id: patient._id },
+      {
+        id: patient._id,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
-    res.status(201).json({
+    // ====================== Response ======================
+
+    return res.status(201).json({
       success: true,
-      message: "Patient Registered Successfully",
+      message: phone
+        ? "Registration successful. Please verify the OTP sent to your mobile."
+        : "Registration successful. You can now login using your email and password.",
       token,
       patient: {
         id: patient._id,
         name: patient.name,
         email: patient.email,
+        phone: patient.phone,
         age: patient.age,
         gender: patient.gender,
-        phone: patient.phone,
         address: patient.address,
+        preferredNotification: patient.preferredNotification,
+        isEmailVerified: patient.isEmailVerified,
+        isPhoneVerified: patient.isPhoneVerified,
       },
     });
 
   } catch (error) {
+    console.error("Register Patient Error:", error);
 
-    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
 
-    res.status(500).json({
+// ====================== VERIFY REGISTRATION OTP ======================
+
+const verifyRegistrationOTP = async (req, res) => {
+  try {
+    let { phone, otp } = req.body;
+
+    if (!phone || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile Number and OTP are required.",
+      });
+    }
+
+    phone = phone.trim();
+
+    if (!isPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Mobile Number.",
+      });
+    }
+
+    const result = await verifyOTP({
+      identifier: phone,
+      otp,
+      purpose: "REGISTER",
+    });
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    const patient = await Patient.findOne({ phone });
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found.",
+      });
+    }
+
+    patient.isPhoneVerified = true;
+
+    await patient.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Mobile Number verified successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Verify Registration OTP Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// ====================== RESEND REGISTRATION OTP ======================
+
+const resendRegistrationOTP = async (req, res) => {
+  try {
+
+    let { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile Number is required.",
+      });
+    }
+
+    phone = phone.trim();
+
+    if (!isPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Mobile Number.",
+      });
+    }
+
+    const patient = await Patient.findOne({ phone });
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found.",
+      });
+    }
+
+    await sendOTP({
+      identifier: phone,
+      role: "patient",
+      purpose: "REGISTER",
+      channel: "sms",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Resend OTP Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -96,80 +369,610 @@ const registerPatient = async (req, res) => {
 
 const loginPatient = async (req, res) => {
   try {
-
-    let { email, password } = req.body;
+    let { identifier, password } = req.body;
 
     // ====================== Validate Required Fields ======================
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and Password are required",
+        message: "Email/Mobile and Password are required.",
       });
     }
 
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({
         success: false,
-        message: "JWT Secret is not configured",
+        message: "JWT Secret is not configured.",
       });
     }
 
-    // ====================== Normalize Input ======================
-
-    email = email.trim().toLowerCase();
+    identifier = identifier.trim();
     password = password.trim();
 
-    // ====================== Find Patient ======================
+    let patient;
 
-    const patient = await Patient.findOne({ email });
+    // ====================== Email Login ======================
 
-    if (!patient) {
-      return res.status(404).json({
-        success: false,
-        message: "Patient not found",
+    if (isEmail(identifier)) {
+
+      patient = await Patient.findOne({
+        email: identifier.toLowerCase(),
       });
+
+      if (!patient) {
+        return res.status(404).json({
+          success: false,
+          message: "Patient not found.",
+        });
+      }
+
+      // No Email Verification Required
+
+    }
+
+    // ====================== Phone Login ======================
+
+    else if (isPhone(identifier)) {
+
+      patient = await Patient.findOne({
+        phone: identifier,
+      });
+
+      if (!patient) {
+        return res.status(404).json({
+          success: false,
+          message: "Patient not found.",
+        });
+      }
+
+      if (!patient.isPhoneVerified) {
+        return res.status(403).json({
+          success: false,
+          message: "Please verify your Mobile Number before logging in.",
+        });
+      }
+
+    }
+
+    // ====================== Invalid Identifier ======================
+
+    else {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email or Mobile Number.",
+      });
+
     }
 
     // ====================== Compare Password ======================
 
-    const isMatch = await bcrypt.compare(password, patient.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      patient.password
+    );
 
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid Password.",
       });
     }
 
-    // ====================== Generate Token ======================
+    // ====================== Update Last Login ======================
+
+    patient.lastLogin = new Date();
+
+    await patient.save();
+
+    // ====================== Login Notification ======================
+
+    if (
+      patient.preferredNotification === "email" ||
+      patient.preferredNotification === "both"
+    ) {
+
+      if (patient.email) {
+
+        await sendNotification({
+          userId: patient._id,
+          userModel: "Patient",
+          recipient: patient.email,
+          channel: "email",
+          title: "Login Successful",
+          message: "You have successfully logged into your account.",
+          type: "GENERAL",
+          html: `
+            <h2>Login Successful</h2>
+            <p>Hello ${patient.name},</p>
+            <p>Your account was logged in successfully.</p>
+          `,
+        });
+
+      }
+
+    }
+
+    if (
+      patient.preferredNotification === "sms" ||
+      patient.preferredNotification === "both"
+    ) {
+
+      if (patient.phone) {
+
+        await sendNotification({
+          userId: patient._id,
+          userModel: "Patient",
+          recipient: patient.phone,
+          channel: "sms",
+          title: "Login Successful",
+          message: "You have successfully logged into your account.",
+          type: "GENERAL",
+        });
+
+      }
+
+    }
+
+    // ====================== Generate JWT ======================
 
     const token = jwt.sign(
-      { id: patient._id },
+      {
+        id: patient._id,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
-    res.status(200).json({
+    // ====================== Response ======================
+
+    return res.status(200).json({
       success: true,
-      message: "Login Successful",
+      message: "Login Successful.",
       token,
       patient: {
         id: patient._id,
         name: patient.name,
         email: patient.email,
+        phone: patient.phone,
         age: patient.age,
         gender: patient.gender,
-        phone: patient.phone,
         address: patient.address,
+        preferredNotification: patient.preferredNotification,
+        isEmailVerified: patient.isEmailVerified,
+        isPhoneVerified: patient.isPhoneVerified,
+        lastLogin: patient.lastLogin,
       },
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Login Patient Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// ====================== FORGOT PASSWORD ======================
+
+const forgotPassword = async (req, res) => {
+  try {
+
+    let { identifier } = req.body;
+
+    if (!identifier) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or Mobile Number is required.",
+      });
+    }
+
+    identifier = identifier.trim();
+
+    let patient;
+    let channel;
+
+    if (isEmail(identifier)) {
+
+      patient = await Patient.findOne({
+        email: identifier.toLowerCase(),
+      });
+
+      channel = "email";
+
+    } else if (isPhone(identifier)) {
+
+      patient = await Patient.findOne({
+        phone: identifier,
+      });
+
+      channel = "sms";
+
+    } else {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email or Mobile Number.",
+      });
+
+    }
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found.",
+      });
+    }
+
+    await sendOTP({
+      identifier,
+      role: "patient",
+      purpose: "FORGOT_PASSWORD",
+      channel,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        channel === "email"
+          ? "Password reset OTP has been sent to your email."
+          : "Password reset OTP has been sent to your mobile.",
+    });
+
+  } catch (error) {
+
+    console.error("Forgot Password Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// ====================== VERIFY FORGOT PASSWORD OTP ======================
+
+const verifyForgotPasswordOTP = async (req, res) => {
+  try {
+
+    let { identifier, otp } = req.body;
+
+    if (!identifier || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Identifier and OTP are required.",
+      });
+    }
+
+    identifier = identifier.trim();
+
+    const result = await verifyOTP({
+      identifier,
+      otp,
+      purpose: "FORGOT_PASSWORD",
+    });
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Verify Forgot Password OTP Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+
+// ====================== RESET PASSWORD ======================
+
+const resetPassword = async (req, res) => {
+  try {
+
+    let {
+      identifier,
+      newPassword,
+      confirmPassword,
+    } = req.body;
+
+    if (!identifier || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Identifier, New Password and Confirm Password are required.",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match.",
+      });
+    }
+
+    identifier = identifier.trim();
+
+    let patient;
+
+    if (isEmail(identifier)) {
+
+      patient = await Patient.findOne({
+        email: identifier.toLowerCase(),
+      });
+
+    } else if (isPhone(identifier)) {
+
+      patient = await Patient.findOne({
+        phone: identifier,
+      });
+
+    } else {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email or Mobile Number.",
+      });
+
+    }
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found.",
+      });
+    }
+
+    patient.password = await bcrypt.hash(newPassword, 10);
+
+    await patient.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully.",
+    });
+
+  } catch (error) {
+
+    console.error("Reset Password Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+// ====================== LOGIN WITH OTP ======================
+
+const loginWithOTP = async (req, res) => {
+  try {
+
+    let { identifier } = req.body;
+
+    if (!identifier) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or Mobile Number is required.",
+      });
+    }
+
+    identifier = identifier.trim();
+
+    let patient;
+    let channel;
+
+    if (isEmail(identifier)) {
+
+      patient = await Patient.findOne({
+        email: identifier.toLowerCase(),
+      });
+
+      channel = "email";
+
+      if (!patient) {
+        return res.status(404).json({
+          success: false,
+          message: "Patient not found.",
+        });
+      }
+
+    } else if (isPhone(identifier)) {
+
+      patient = await Patient.findOne({
+        phone: identifier,
+      });
+
+      channel = "sms";
+
+      if (!patient) {
+        return res.status(404).json({
+          success: false,
+          message: "Patient not found.",
+        });
+      }
+
+      if (!patient.isPhoneVerified) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Please verify your Mobile Number before logging in.",
+        });
+      }
+
+    } else {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email or Mobile Number.",
+      });
+
+    }
+
+    await sendOTP({
+      identifier,
+      role: "patient",
+      purpose: "LOGIN",
+      channel,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        channel === "email"
+          ? "OTP sent to your email."
+          : "OTP sent to your mobile.",
+    });
+
+  } catch (error) {
+
+    console.error("Login With OTP Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
+// ====================== VERIFY LOGIN OTP ======================
+
+const verifyLoginOTP = async (req, res) => {
+  try {
+
+    let { identifier, otp } = req.body;
+
+    if (!identifier || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Identifier and OTP are required.",
+      });
+    }
+
+    identifier = identifier.trim();
+
+    const result = await verifyOTP({
+      identifier,
+      otp,
+      purpose: "LOGIN",
+    });
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    let patient;
+
+    if (isEmail(identifier)) {
+
+      patient = await Patient.findOne({
+        email: identifier.toLowerCase(),
+      });
+
+    } else if (isPhone(identifier)) {
+
+      patient = await Patient.findOne({
+        phone: identifier,
+      });
+
+    } else {
+
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Email or Mobile Number.",
+      });
+
+    }
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found.",
+      });
+    }
+
+    patient.lastLogin = new Date();
+    await patient.save();
+
+    const token = jwt.sign(
+      {
+        id: patient._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    if (patient.email) {
+      await sendNotification({
+        userId: patient._id,
+        userModel: "Patient",
+        recipient: patient.email,
+        channel: "email",
+        title: "OTP Login Successful",
+        message: "You have successfully logged in using OTP.",
+        type: "GENERAL",
+        html: `
+          <h2>Login Successful</h2>
+          <p>Hello ${patient.name},</p>
+          <p>Your account has been logged in successfully using OTP.</p>
+        `,
+      });
+    }
+
+    if (patient.phone) {
+      await sendNotification({
+        userId: patient._id,
+        userModel: "Patient",
+        recipient: patient.phone,
+        channel: "sms",
+        title: "OTP Login Successful",
+        message: "You have successfully logged in using OTP.",
+        type: "GENERAL",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Login Successful.",
+      token,
+      patient: {
+        id: patient._id,
+        name: patient.name,
+        email: patient.email,
+        phone: patient.phone,
+        age: patient.age,
+        gender: patient.gender,
+        address: patient.address,
+        preferredNotification: patient.preferredNotification,
+        isEmailVerified: patient.isEmailVerified,
+        isPhoneVerified: patient.isPhoneVerified,
+        lastLogin: patient.lastLogin,
+      },
+    });
+
+  } catch (error) {
+
+    console.error("Verify Login OTP Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -187,20 +990,20 @@ const getPatientProfile = async (req, res) => {
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: "Patient not found",
+        message: "Patient not found.",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       patient,
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Get Patient Profile Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -213,44 +1016,83 @@ const getPatientProfile = async (req, res) => {
 const updatePatientProfile = async (req, res) => {
   try {
 
-    const { name, age, gender, phone, address } = req.body;
+    const {
+      name,
+      age,
+      gender,
+      phone,
+      address,
+      preferredNotification,
+    } = req.body;
 
     const patient = await Patient.findById(req.user.id);
 
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: "Patient not found",
+        message: "Patient not found.",
       });
     }
 
     if (name !== undefined) patient.name = name.trim();
+
     if (age !== undefined) patient.age = age;
+
     if (gender !== undefined) patient.gender = gender;
-    if (phone !== undefined) patient.phone = phone.trim();
-    if (address !== undefined) patient.address = address.trim();
+
+    if (phone !== undefined) {
+
+      if (phone && !isPhone(phone)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Mobile Number.",
+        });
+      }
+
+      // Check duplicate phone
+      const existingPatient = await Patient.findOne({
+        phone,
+        _id: { $ne: patient._id },
+      });
+
+      if (existingPatient) {
+        return res.status(409).json({
+          success: false,
+          message: "Mobile Number already exists.",
+        });
+      }
+
+      patient.phone = phone.trim();
+    }
+
+    if (address !== undefined)
+      patient.address = address.trim();
+
+    if (preferredNotification !== undefined) {
+
+      if (!["email", "sms", "both"].includes(preferredNotification)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid notification preference.",
+        });
+      }
+
+      patient.preferredNotification = preferredNotification;
+    }
 
     await patient.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Profile Updated Successfully",
-      patient: {
-        id: patient._id,
-        name: patient.name,
-        email: patient.email,
-        age: patient.age,
-        gender: patient.gender,
-        phone: patient.phone,
-        address: patient.address,
-      },
+      message: "Profile Updated Successfully.",
+      patient,
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Update Patient Profile Error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -258,11 +1100,44 @@ const updatePatientProfile = async (req, res) => {
   }
 };
 
-// ====================== EXPORT ======================
+// ====================== GET ALL PATIENTS ======================
+
+const getAllPatients = async (req, res) => {
+  try {
+
+    const patients = await Patient.find().select("-password");
+
+    return res.status(200).json({
+      success: true,
+      patients,
+    });
+
+  } catch (error) {
+
+    console.error("Get All Patients Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+};
 
 module.exports = {
   registerPatient,
+  verifyRegistrationOTP,
+  resendRegistrationOTP,
+
   loginPatient,
+  loginWithOTP,
+  verifyLoginOTP,
+
+  forgotPassword,
+  verifyForgotPasswordOTP,
+  resetPassword,
+
   getPatientProfile,
   updatePatientProfile,
+  getAllPatients,
 };
