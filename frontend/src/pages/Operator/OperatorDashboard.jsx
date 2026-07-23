@@ -67,7 +67,7 @@ const OperatorDashboard = () => {
   return (
     <div className="dashboard-container">
       <PageTitle
-        title={`Welcome, ${operator?.name || "Operator"} 👋`}
+        title={`Welcome, ${operator?.name || "Operator"} `}
         subtitle="Manage patients, appointments and medical reports."
       />
 
