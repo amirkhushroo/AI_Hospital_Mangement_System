@@ -34,15 +34,15 @@ import AdminAppointments from "../pages/Admin/Appointments";
 import AdminReports from "../pages/Admin/Reports";
 
 // ====================== Operator ======================
-import OperatorLogin from "../pages/operator/OperatorLogin";
-import OperatorDashboard from "../pages/operator/OperatorDashboard";
-import AppointmentList from "../pages/operator/AppointmentList";
-import RegisterPatient from "../pages/operator/RegisterPatient";
-import BookAppointment from "../pages/operator/BookAppointment";
-import PatientManagement from "../pages/operator/PatientManagement";
-import DoctorAvailability from "../pages/operator/DoctorAvailability";
-import UploadReports from "../pages/operator/UploadReports";
-import Profile from "../pages/operator/Profile";
+import OperatorLogin from "../pages/Operator/OperatorLogin";
+import OperatorDashboard from "../pages/Operator/OperatorDashboard";
+import AppointmentList from "../pages/Operator/AppointmentList";
+import RegisterPatient from "../pages/Operator/RegisterPatient";
+import BookAppointment from "../pages/Operator/BookAppointment";
+import PatientManagement from "../pages/Operator/PatientManagement";
+import DoctorAvailability from "../pages/Operator/DoctorAvailability";
+import UploadReports from "../pages/Operator/UploadReports";
+import Profile from "../pages/Operator/Profile";
 function AppRoutes() {
   return (
     <Routes>
