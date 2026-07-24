@@ -149,7 +149,7 @@ function Register() {
           <input
             type="email"
             name="email"
-            placeholder="Email (Optional)"
+            placeholder="Email "
             value={formData.email}
             onChange={handleChange}
           />
@@ -168,7 +168,7 @@ function Register() {
           <input
             type="text"
             name="phone"
-            placeholder="Mobile Number (Optional)"
+            placeholder="Mobile Number"
             value={formData.phone}
             onChange={handleChange}
           />
