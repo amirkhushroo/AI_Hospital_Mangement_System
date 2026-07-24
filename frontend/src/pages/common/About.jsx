@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   Ambulance,
   Brain,
@@ -33,6 +35,82 @@ function About() {
       specialization: "Orthopedic",
     },
   ];
+  const [activeIndex, setActiveIndex] = useState(null);
+
+const features = [
+  {
+    icon: Brain,
+    title: "AI Based Diagnosis",
+    description:
+      "Analyze patient symptoms using AI and receive intelligent disease predictions along with department recommendations.",
+    points: [
+      "Symptom Analysis",
+      "Disease Prediction",
+      "Department Recommendation",
+      "Suggested Tests",
+    ],
+  },
+  {
+    icon: CalendarDays,
+    title: "Easy Appointment Booking",
+    description:
+      "Book appointments quickly without waiting in long queues.",
+    points: [
+      "Instant Booking",
+      "Doctor Availability",
+      "Appointment History",
+      "Reschedule Anytime",
+    ],
+  },
+  {
+    icon: Stethoscope,
+    title: "Expert Doctors",
+    description:
+      "Consult experienced and verified healthcare professionals.",
+    points: [
+      "Verified Specialists",
+      "Multiple Departments",
+      "Doctor Profiles",
+      "Experienced Staff",
+    ],
+  },
+  {
+    icon: FileText,
+    title: "Secure Medical Records",
+    description:
+      "Patient records are securely stored and accessible anytime.",
+    points: [
+      "Encrypted Storage",
+      "Medical History",
+      "Prescriptions",
+      "Lab Reports",
+    ],
+  },
+  {
+    icon: Building2,
+    title: "Modern Healthcare",
+    description:
+      "A complete digital healthcare platform for patients and hospitals.",
+    points: [
+      "Paperless System",
+      "AI Integration",
+      "Fast Workflow",
+      "Cloud Storage",
+    ],
+  },
+  {
+    icon: Ambulance,
+    title: "24×7 Emergency Support",
+    description:
+      "Emergency healthcare support whenever you need it.",
+    points: [
+      "Quick Response",
+      "Emergency Contact",
+      "Priority Treatment",
+      "24/7 Availability",
+    ],
+  },
+];
 
   return (
     <div
@@ -133,37 +211,69 @@ function About() {
       <section className="why-us">
         <h2>Why Choose Us?</h2>
 
-        <ul>
-          <li>
-            <Brain size={18} />
-            AI Based Diagnosis
-          </li>
+       <div className="feature-list">
 
-          <li>
-            <CalendarDays size={18} />
-            Easy Appointment Booking
-          </li>
+  {features.map((feature, index) => {
 
-          <li>
-            <Stethoscope size={18} />
-            Expert Doctors
-          </li>
+    const Icon = feature.icon;
 
-          <li>
-            <FileText size={18} />
-            Secure Medical Records
-          </li>
+    return (
 
-          <li>
-            <Building2 size={18} />
-            Modern Healthcare
-          </li>
+      <div
+        key={index}
+        className={`feature-card ${
+          activeIndex === index ? "active" : ""
+        }`}
+        onClick={() =>
+          setActiveIndex(
+            activeIndex === index ? null : index
+          )
+        }
+      >
 
-          <li>
-            <Ambulance size={18} />
-            24×7 Emergency Support
-          </li>
-        </ul>
+        <div className="feature-header">
+
+          <div className="feature-title">
+
+            <Icon size={22} />
+
+            <span>{feature.title}</span>
+
+          </div>
+
+          <ChevronDown
+  size={26}
+  className={`feature-arrow ${activeIndex === index ? "rotate" : ""}`}
+/>
+        </div>
+
+        <div className="feature-content">
+
+          <p>{feature.description}</p>
+
+          <div className="feature-grid">
+
+            {feature.points.map((point, i) => (
+
+              <div key={i} className="feature-point">
+
+                ✓ {point}
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    );
+
+  })}
+
+</div>
       </section>
     </div>
   );

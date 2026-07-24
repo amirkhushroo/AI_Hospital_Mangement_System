@@ -1,12 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
+import { User, CalendarDays, FileText, LogOut, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import LoginModal from "../LoginModal";
 
 import {
   Home,
   Info,
-  LogOut,
 } from "lucide-react";
 
 import "./Navbar.css";
@@ -17,6 +17,42 @@ function Navbar() {
   const location = useLocation();
 
   const [showLogin, setShowLogin] = useState(false);
+
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+const menuRef = useRef(null);
+
+const patient = JSON.parse(localStorage.getItem("patient"));
+const doctor = JSON.parse(localStorage.getItem("doctor"));
+const admin = JSON.parse(localStorage.getItem("admin"));
+const operator = JSON.parse(localStorage.getItem("operator"));
+
+const user = patient || doctor || admin || operator;
+
+const role = patient
+  ? "patient"
+  : doctor
+  ? "doctor"
+  : admin
+  ? "admin"
+  : operator
+  ? "operator"
+  : null;
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setShowProfileMenu(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -106,19 +142,102 @@ function Navbar() {
             </li>
           )}
 
-          {isLoggedIn && (
-            <li>
-              <motion.button
-                className="logout-btn"
-                onClick={handleLogout}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <LogOut size={18} />
-                Logout
-              </motion.button>
-            </li>
-          )}
+       {isLoggedIn && (
+
+<li className="profile-dropdown" ref={menuRef}>
+
+<button
+className="profile-btn"
+onClick={() => setShowProfileMenu(!showProfileMenu)}
+>
+
+<div className="avatar">
+  {(user?.name || role || "U")
+    .charAt(0)
+    .toUpperCase()}
+</div>
+
+<span>{user?.name || "Patient"}</span>
+
+<ChevronDown
+size={18}
+className={showProfileMenu ? "rotate" : ""}
+/>
+
+</button>
+
+{showProfileMenu && (
+
+<div className="profile-menu">
+
+<div className="profile-header">
+<h4>{user?.name || "User"}</h4>
+
+<p>{user?.email}</p>
+
+<small style={{ color: "#666" }}>
+  {role?.charAt(0).toUpperCase() + role?.slice(1)}
+</small>
+
+</div>
+
+<Link
+to={`/${role}/profile`}
+onClick={() => setShowProfileMenu(false)}
+>
+<User size={16}/>
+My Profile
+</Link>
+
+<Link
+to={
+  role === "patient"
+    ? "/patient/my-appointments"
+    : role === "doctor"
+    ? "/doctor/appointments"
+    : role === "admin"
+    ? "/admin/dashboard"
+    : "/operator/dashboard"
+}
+onClick={() => setShowProfileMenu(false)}
+>
+<CalendarDays size={16}/>
+My Appointments
+</Link>
+
+<Link
+to={
+  role === "patient"
+    ? "/patient/medical-records"
+    : role === "doctor"
+    ? "/doctor/dashboard"
+    : role === "admin"
+    ? "/admin/dashboard"
+    : "/operator/dashboard"
+}
+onClick={() => setShowProfileMenu(false)}
+>
+<FileText size={16}/>
+Medical Records
+</Link>
+
+<button
+  onClick={() => {
+    setShowProfileMenu(false);
+    handleLogout();
+  }}
+>
+<LogOut size={16}/>
+Logout
+</button>
+
+</div>
+
+)}
+
+</li>
+
+)}
         </ul>
       </motion.nav>
 
