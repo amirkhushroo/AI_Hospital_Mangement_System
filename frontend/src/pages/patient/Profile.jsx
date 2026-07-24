@@ -5,7 +5,6 @@ import api from "../../services/api";
 import "./Profile.css";
 
 function Profile() {
-
   const [patient, setPatient] = useState({
     name: "",
     email: "",
@@ -26,7 +25,6 @@ function Profile() {
 
   const fetchProfile = async () => {
     try {
-
       const token = localStorage.getItem("token");
 
       const response = await api.get("/patient/profile", {
@@ -38,7 +36,6 @@ function Profile() {
       if (response.data.success) {
         setPatient(response.data.patient);
       }
-
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to load profile"
@@ -61,7 +58,6 @@ function Profile() {
 
   const handleUpdate = async () => {
     try {
-
       setSaving(true);
 
       const token = localStorage.getItem("token");
@@ -79,7 +75,6 @@ function Profile() {
       if (response.data.success) {
         toast.success("Profile Updated Successfully");
       }
-
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Update Failed"
@@ -89,23 +84,27 @@ function Profile() {
     }
   };
 
+  // ================= Loading =================
+
   if (loading) {
     return (
       <div style={{ padding: "20px" }}>
-        <BackButton />
         <h2 style={{ textAlign: "center" }}>Loading...</h2>
       </div>
     );
   }
 
+  // ================= UI =================
+
   return (
     <div className="profile-page">
 
-      {/* ================= BACK BUTTON ================= */}
 
       <div className="profile-card">
 
-        <h1><User size={20} /> My Profile</h1>
+        <h1>
+          <User size={20} /> My Profile
+        </h1>
 
         <div className="profile-image">
           <User size={28} />
@@ -146,9 +145,9 @@ function Profile() {
             value={patient.gender}
             onChange={handleChange}
           >
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
           </select>
 
           <label>Phone</label>
@@ -169,7 +168,7 @@ function Profile() {
             onChange={handleChange}
           />
 
-          <button onClick={handleUpdate}>
+          <button onClick={handleUpdate} disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}
           </button>
 
