@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, User } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -119,7 +118,6 @@ function Appointments() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
 
       <h1><CalendarDays size={20} /> Manage Appointments</h1>
 

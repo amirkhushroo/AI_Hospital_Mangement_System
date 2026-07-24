@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bot, Sparkles, ShieldAlert, Stethoscope } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -102,7 +101,7 @@ function SymptomChecker() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
+      
 
       <h1>
         <span className="symptom-icon">

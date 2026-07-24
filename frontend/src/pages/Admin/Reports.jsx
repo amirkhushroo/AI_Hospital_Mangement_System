@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Activity, Brain, User } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -112,7 +111,6 @@ function Reports() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
 
       <h1>
         <Activity size={20} /> Hospital Reports

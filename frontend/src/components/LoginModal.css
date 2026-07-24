@@ -1,0 +1,95 @@
+.login-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(6px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.login-modal{
+    width:430px;
+    background:white;
+    border-radius:22px;
+    padding:35px;
+    position:relative;
+    animation:popup .3s ease;
+}
+
+@keyframes popup{
+from{
+opacity:0;
+transform:scale(.9);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}
+
+.close-btn{
+position:absolute;
+top:18px;
+right:18px;
+border:none;
+background:none;
+cursor:pointer;
+}
+
+.login-modal h2{
+font-size:32px;
+font-weight:700;
+color:#2563eb;
+margin-bottom:5px;
+}
+
+.login-modal p{
+color:#777;
+margin-bottom:30px;
+}
+
+.portal-login-card {
+display:flex;
+align-items:center;
+gap:18px;
+
+padding:18px 22px;
+
+margin-bottom:18px;
+
+border-radius:15px;
+
+text-decoration:none;
+
+font-size:18px;
+font-weight:600;
+
+transition:.3s;
+}
+
+.patient{
+background:#e0f2fe;
+color:#0369a1;
+}
+
+.doctor{
+background:#dcfce7;
+color:#15803d;
+}
+
+.admin{
+background:#fef3c7;
+color:#b45309;
+}
+
+.operator{
+background:#ede9fe;
+color:#6d28d9;
+}
+
+.portal-login-card:hover {
+transform:translateY(-3px);
+box-shadow:0 10px 25px rgba(0,0,0,.15);
+}

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Stethoscope, User } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
@@ -75,7 +74,7 @@ function Patients() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
+    
 
       <h1><Stethoscope size={20} /> My Patients</h1>
 

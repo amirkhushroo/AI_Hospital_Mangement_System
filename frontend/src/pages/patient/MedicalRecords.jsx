@@ -1,5 +1,4 @@
 import { FileText } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import "./MedicalRecords.css";
 
 function MedicalRecords() {
@@ -28,7 +27,6 @@ function MedicalRecords() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
 
       <h1><FileText size={20} /> Medical Records</h1>
 

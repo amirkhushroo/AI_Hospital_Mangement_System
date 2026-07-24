@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Stethoscope, Trash2 } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import Loader from "../../components/Loader/Loader";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -93,7 +92,7 @@ function Doctors() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
+  
 
       <h1>
         <Stethoscope size={20} /> Manage Doctors

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Stethoscope } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
@@ -89,7 +88,6 @@ function Profile() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
 
       <h1><Stethoscope size={20} /> Doctor Profile</h1>
 

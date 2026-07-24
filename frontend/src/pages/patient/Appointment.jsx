@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
-import BackButton from "../../components/BackButton";
+
 import Loader from "../../components/Loader/Loader";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -155,7 +155,7 @@ function Appointment() {
 
     <div className="appointment-container">
 
-      <BackButton />
+    
 
       <div className="appointment-card">
 

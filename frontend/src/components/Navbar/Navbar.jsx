@@ -1,13 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import LoginModal from "../LoginModal";
+
 import {
-  Activity,
   Home,
   Info,
   LogOut,
-  ShieldCheck,
-  Stethoscope,
-  ClipboardList,
 } from "lucide-react";
 
 import "./Navbar.css";
@@ -16,6 +15,8 @@ import logo from "../../assets/logo1.png";
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -40,131 +41,92 @@ function Navbar() {
       localStorage.getItem("operatorToken")
   );
 
-  const isActive = (path) => location.pathname.startsWith(path);
+  const isActive = (path) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <motion.nav
-      className="navbar"
-      initial={{ opacity: 0, y: -24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: "easeOut" }}
-    >
-      <Link className="logo" to="/">
-        <motion.img
-          src={logo}
-          alt="MED-CONNECT AI"
-          className="logo-img"
-          whileHover={{ scale: 1.08, rotate: 3 }}
-          transition={{
-            type: "spring",
-            stiffness: 260,
-            damping: 16,
-          }}
-        />
+    <>
+      <motion.nav
+        className="navbar"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Logo */}
 
-        <span className="logo-text">
-          <span className="logo-word">MED-CONNECT</span>
-          <span className="logo-accent">HOSPITAL</span>
-        </span>
-      </Link>
+        <Link className="logo" to="/">
+          <motion.img
+            src={logo}
+            alt="MED-CONNECT"
+            className="logo-img"
+            whileHover={{ scale: 1.08, rotate: 3 }}
+          />
 
-      <ul className="nav-links">
-        <li>
-          <Link className={isActive("/") ? "active" : ""} to="/">
-            <span className="nav-link-icon">
-              <Home size={16} />
-            </span>
-            <span className="nav-link-text">Home</span>
-          </Link>
-        </li>
+          <span className="logo-text">
+            <span className="logo-word">MED-CONNECT</span>
+            <span className="logo-accent">HOSPITAL</span>
+          </span>
+        </Link>
 
-        <li>
-          <Link
-            className={isActive("/about") ? "active" : ""}
-            to="/about"
-          >
-            <span className="nav-link-icon">
-              <Info size={16} />
-            </span>
-            <span className="nav-link-text">About</span>
-          </Link>
-        </li>
+        {/* Navigation */}
 
-        <li>
-          <Link
-            className={isActive("/patient") ? "active" : ""}
-            to="/patient/login"
-          >
-            <span className="nav-link-icon">
-              <Activity size={16} />
-            </span>
-            <span className="nav-link-text">Patient</span>
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            className={isActive("/doctor") ? "active" : ""}
-            to="/doctor/login"
-          >
-            <span className="nav-link-icon">
-              <Stethoscope size={16} />
-            </span>
-            <span className="nav-link-text">Doctor</span>
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            className={isActive("/admin") ? "active" : ""}
-            to="/admin/login"
-          >
-            <span className="nav-link-icon">
-              <ShieldCheck size={16} />
-            </span>
-            <span className="nav-link-text">Admin</span>
-          </Link>
-        </li>
-
-        {/* NEW OPERATOR MENU */}
-
-        <li>
-          <Link
-            className={isActive("/operator") ? "active" : ""}
-            to="/operator/login"
-          >
-            <span className="nav-link-icon">
-              <ClipboardList size={16} />
-            </span>
-            <span className="nav-link-text">Operator</span>
-          </Link>
-        </li>
-
-        {isLoggedIn && (
+        <ul className="nav-links">
           <li>
-            <motion.button
-              className="logout-btn"
-              onClick={handleLogout}
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{
-                type: "spring",
-                stiffness: 260,
-                damping: 18,
-              }}
+            <Link
+              className={isActive("/") ? "active" : ""}
+              to="/"
             >
-              <span className="nav-link-icon">
-                <LogOut size={16} />
-              </span>
-
-              <span className="nav-link-text">
-                Logout
-              </span>
-            </motion.button>
+              <Home size={18} />
+              <span>Home</span>
+            </Link>
           </li>
-        )}
-      </ul>
-    </motion.nav>
+
+          <li>
+            <Link
+              className={isActive("/about") ? "active" : ""}
+              to="/about"
+            >
+              <Info size={18} />
+              <span>About</span>
+            </Link>
+          </li>
+
+          {!isLoggedIn && (
+            <li>
+              <button
+                className="login-menu-btn"
+                onClick={() => setShowLogin(true)}
+              >
+                Login
+              </button>
+            </li>
+          )}
+
+          {isLoggedIn && (
+            <li>
+              <motion.button
+                className="logout-btn"
+                onClick={handleLogout}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <LogOut size={18} />
+                Logout
+              </motion.button>
+            </li>
+          )}
+        </ul>
+      </motion.nav>
+
+      <LoginModal
+        open={showLogin}
+        onClose={() => setShowLogin(false)}
+      />
+    </>
   );
 }
 

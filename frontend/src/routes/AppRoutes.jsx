@@ -1,3 +1,4 @@
+import ProtectedLayout from "../components/ProtectedLayout";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoute";
 
@@ -61,58 +62,19 @@ function AppRoutes() {
       />
 
       <Route
-        path="/patient/dashboard"
-        element={
-          <ProtectedRoute role="patient">
-            <PatientDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/patient/profile"
-        element={
-          <ProtectedRoute role="patient">
-            <PatientProfile />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/patient/appointment"
-        element={
-          <ProtectedRoute role="patient">
-            <Appointment />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/patient/my-appointments"
-        element={
-          <ProtectedRoute role="patient">
-            <MyAppointments />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/patient/medical-records"
-        element={
-          <ProtectedRoute role="patient">
-            <MedicalRecords />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/patient/symptom-checker"
-        element={
-          <ProtectedRoute role="patient">
-            <SymptomChecker />
-          </ProtectedRoute>
-        }
-      />
+  element={
+    <ProtectedRoute role="patient">
+      <ProtectedLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route path="/patient/dashboard" element={<PatientDashboard />} />
+  <Route path="/patient/profile" element={<PatientProfile />} />
+  <Route path="/patient/appointment" element={<Appointment />} />
+  <Route path="/patient/my-appointments" element={<MyAppointments />} />
+  <Route path="/patient/medical-records" element={<MedicalRecords />} />
+  <Route path="/patient/symptom-checker" element={<SymptomChecker />} />
+</Route>
 
       {/* ====================== Doctor ====================== */}
 
@@ -127,32 +89,17 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path="/doctor/profile"
-        element={
-          <ProtectedRoute role="doctor">
-            <DoctorProfile />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/doctor/appointments"
-        element={
-          <ProtectedRoute role="doctor">
-            <DoctorAppointments />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/doctor/patients"
-        element={
-          <ProtectedRoute role="doctor">
-            <DoctorPatients />
-          </ProtectedRoute>
-        }
-      />
+      /<Route
+  element={
+    <ProtectedRoute role="doctor">
+      <ProtectedLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route path="/doctor/profile" element={<DoctorProfile />} />
+  <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+  <Route path="/doctor/patients" element={<DoctorPatients />} />
+</Route>
 
       {/* ====================== Admin ====================== */}
 
@@ -166,42 +113,20 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
-      <Route
-        path="/admin/doctors"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminDoctors />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/patients"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminPatients />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/appointments"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminAppointments />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/reports"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminReports />
-          </ProtectedRoute>
-        }
-      />
+     <Route
+  element={
+    <ProtectedRoute role="admin">
+      <ProtectedLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route path="/admin/doctors" element={<AdminDoctors />} />
+  <Route path="/admin/patients" element={<AdminPatients />} />
+  <Route path="/admin/appointments" element={<AdminAppointments />} />
+  <Route path="/admin/reports" element={<AdminReports />} />
+</Route>
+     
+      
 
       {/* ====================== Operator ====================== */}
 
@@ -215,69 +140,23 @@ function AppRoutes() {
     </ProtectedRoute>
   }
 />
-
 <Route
-  path="/operator/register-patient"
   element={
     <ProtectedRoute role="operator">
-      <RegisterPatient />
+      <ProtectedLayout />
     </ProtectedRoute>
   }
-/>
+>
+  <Route path="/operator/register-patient" element={<RegisterPatient />} />
+  <Route path="/operator/book-appointment" element={<BookAppointment />} />
+  <Route path="/operator/appointments" element={<AppointmentList />} />
+  <Route path="/operator/patients" element={<PatientManagement />} />
+  <Route path="/operator/doctor-availability" element={<DoctorAvailability />} />
+  <Route path="/operator/upload-report" element={<UploadReports />} />
+  <Route path="/operator/profile" element={<Profile />} />
+</Route>
 
-<Route
-  path="/operator/book-appointment"
-  element={
-    <ProtectedRoute role="operator">
-      <BookAppointment />
-    </ProtectedRoute>
-  }
-/>
 
-<Route
-  path="/operator/appointments"
-  element={
-    <ProtectedRoute role="operator">
-      <AppointmentList />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/operator/patients"
-  element={
-    <ProtectedRoute role="operator">
-      <PatientManagement />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/operator/doctor-availability"
-  element={
-    <ProtectedRoute role="operator">
-      <DoctorAvailability />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/operator/upload-report"
-  element={
-    <ProtectedRoute role="operator">
-      <UploadReports />
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="/operator/profile"
-  element={
-    <ProtectedRoute role="operator">
-      <Profile />
-    </ProtectedRoute>
-  }
-/>
 
       {/* ====================== 404 ====================== */}
 

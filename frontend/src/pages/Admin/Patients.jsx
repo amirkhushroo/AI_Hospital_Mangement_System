@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Trash2, User, Users } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Patients.css";
@@ -110,7 +109,6 @@ function Patients() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
 
       <h1><Users size={20} /> Manage Patients</h1>
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Check, CircleX, CalendarDays, User } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Appointments.css";
@@ -90,7 +89,7 @@ function Appointments() {
 
       {/* ================= BACK BUTTON ================= */}
 
-      <BackButton />
+  
 
       <h1>
         <CalendarDays size={20} /> Doctor Appointments

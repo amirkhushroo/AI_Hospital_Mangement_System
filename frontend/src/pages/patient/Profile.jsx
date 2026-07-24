@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
-import BackButton from "../../components/BackButton";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import "./Profile.css";
@@ -103,8 +102,6 @@ function Profile() {
     <div className="profile-page">
 
       {/* ================= BACK BUTTON ================= */}
-
-      <BackButton />
 
       <div className="profile-card">
 
