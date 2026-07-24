@@ -6,6 +6,11 @@ const Doctor = require("../models/Doctor");
 
 const bookAppointment = async (req, res) => {
   try {
+
+    console.log("===== BOOK APPOINTMENT =====");
+    console.log("User:", req.user);
+    console.log("Body:", req.body);
+
     const {
       patientId,
       doctorId,

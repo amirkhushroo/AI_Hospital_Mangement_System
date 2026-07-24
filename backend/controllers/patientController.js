@@ -14,41 +14,29 @@ const {
 const isEmail = require("../utils/isEmail");
 const isPhone = require("../utils/isPhone");
 
+// ====================== REGISTER PATIENT ======================
+
 const registerPatient = async (req, res) => {
   try {
     let {
       name,
-      email,
-      phone,
+      identifier,
       password,
       age,
       gender,
       address,
     } = req.body;
 
+    let email = null;
+    let phone = null;
+
     // ====================== Validate Required Fields ======================
 
-    if (!name || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Name and Password are required.",
-      });
-    }
-
-    // Either Email or Phone is required
-    if (!email && !phone) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide either Email or Mobile Number.",
-      });
-    }
-
-    // Cannot register using both Email and Phone together
-    if (email && phone) {
+    if (!name || !identifier || !password) {
       return res.status(400).json({
         success: false,
         message:
-          "Please register using either Email or Mobile Number, not both.",
+          "Name, Email/Mobile Number and Password are required.",
       });
     }
 
@@ -62,14 +50,20 @@ const registerPatient = async (req, res) => {
     // ====================== Normalize Data ======================
 
     name = name.trim();
+    identifier = identifier.trim();
     password = password.trim();
 
-    if (email) {
-      email = email.trim().toLowerCase();
-    }
+    // ====================== Detect Email or Phone ======================
 
-    if (phone) {
-      phone = phone.trim();
+    if (isEmail(identifier)) {
+      email = identifier.toLowerCase();
+    } else if (isPhone(identifier)) {
+      phone = identifier;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid Email or Mobile Number.",
+      });
     }
 
     // ====================== Validate Email ======================
@@ -120,15 +114,9 @@ const registerPatient = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-        // ====================== Notification Preference ======================
+    // ====================== Notification Preference ======================
 
-    let preferredNotification;
-
-    if (email) {
-      preferredNotification = "email";
-    } else {
-      preferredNotification = "sms";
-    }
+    const preferredNotification = email ? "email" : "sms";
 
     // ====================== Create Patient ======================
 
@@ -145,19 +133,18 @@ const registerPatient = async (req, res) => {
 
     if (email) {
       patientData.email = email;
-      patientData.isEmailVerified = true; // Email registration doesn't require OTP
+      patientData.isEmailVerified = true;
     }
 
     if (phone) {
       patientData.phone = phone;
-      patientData.isPhoneVerified = false; // Phone must verify OTP
+      patientData.isPhoneVerified = false;
     }
 
     const patient = await Patient.create(patientData);
 
     // ====================== Registration OTP ======================
 
-    // Send OTP only for Phone Registration
     if (phone) {
       await sendOTP({
         identifier: phone,
@@ -169,7 +156,6 @@ const registerPatient = async (req, res) => {
 
     // ====================== Welcome Notification ======================
 
-    // Email registration → Welcome email only (No OTP)
     if (email) {
       await sendNotification({
         userId: patient._id,
@@ -177,8 +163,7 @@ const registerPatient = async (req, res) => {
         recipient: email,
         channel: "email",
         title: "Welcome to AI Hospital Management System",
-        message:
-          "Your account has been created successfully.",
+        message: "Your account has been created successfully.",
         type: "GENERAL",
         html: `
           <h2>Welcome ${patient.name}</h2>
@@ -188,7 +173,6 @@ const registerPatient = async (req, res) => {
       });
     }
 
-    // Phone registration → Welcome SMS
     if (phone) {
       await sendNotification({
         userId: patient._id,
@@ -202,11 +186,12 @@ const registerPatient = async (req, res) => {
       });
     }
 
-        // ====================== Generate Token ======================
+    // ====================== Generate Token ======================
 
     const token = jwt.sign(
       {
         id: patient._id,
+        role: "patient",
       },
       process.env.JWT_SECRET,
       {
@@ -407,8 +392,6 @@ const loginPatient = async (req, res) => {
         });
       }
 
-      // No Email Verification Required
-
     }
 
     // ====================== Phone Login ======================
@@ -520,6 +503,7 @@ const loginPatient = async (req, res) => {
     const token = jwt.sign(
       {
         id: patient._id,
+        role: "patient",
       },
       process.env.JWT_SECRET,
       {
@@ -579,6 +563,8 @@ const forgotPassword = async (req, res) => {
     let patient;
     let channel;
 
+    // ====================== Email ======================
+
     if (isEmail(identifier)) {
 
       patient = await Patient.findOne({
@@ -587,7 +573,11 @@ const forgotPassword = async (req, res) => {
 
       channel = "email";
 
-    } else if (isPhone(identifier)) {
+    }
+
+    // ====================== Mobile ======================
+
+    else if (isPhone(identifier)) {
 
       patient = await Patient.findOne({
         phone: identifier,
@@ -595,7 +585,11 @@ const forgotPassword = async (req, res) => {
 
       channel = "sms";
 
-    } else {
+    }
+
+    // ====================== Invalid Identifier ======================
+
+    else {
 
       return res.status(400).json({
         success: false,
@@ -711,19 +705,29 @@ const resetPassword = async (req, res) => {
 
     let patient;
 
+    // ====================== Email ======================
+
     if (isEmail(identifier)) {
 
       patient = await Patient.findOne({
         email: identifier.toLowerCase(),
       });
 
-    } else if (isPhone(identifier)) {
+    }
+
+    // ====================== Mobile ======================
+
+    else if (isPhone(identifier)) {
 
       patient = await Patient.findOne({
         phone: identifier,
       });
 
-    } else {
+    }
+
+    // ====================== Invalid Identifier ======================
+
+    else {
 
       return res.status(400).json({
         success: false,
@@ -759,6 +763,7 @@ const resetPassword = async (req, res) => {
 
   }
 };
+
 // ====================== LOGIN WITH OTP ======================
 
 const loginWithOTP = async (req, res) => {
@@ -778,6 +783,8 @@ const loginWithOTP = async (req, res) => {
     let patient;
     let channel;
 
+    // ====================== Email ======================
+
     if (isEmail(identifier)) {
 
       patient = await Patient.findOne({
@@ -793,7 +800,11 @@ const loginWithOTP = async (req, res) => {
         });
       }
 
-    } else if (isPhone(identifier)) {
+    }
+
+    // ====================== Mobile ======================
+
+    else if (isPhone(identifier)) {
 
       patient = await Patient.findOne({
         phone: identifier,
@@ -816,7 +827,11 @@ const loginWithOTP = async (req, res) => {
         });
       }
 
-    } else {
+    }
+
+    // ====================== Invalid Identifier ======================
+
+    else {
 
       return res.status(400).json({
         success: false,
@@ -851,6 +866,7 @@ const loginWithOTP = async (req, res) => {
 
   }
 };
+
 // ====================== VERIFY LOGIN OTP ======================
 
 const verifyLoginOTP = async (req, res) => {
@@ -879,19 +895,29 @@ const verifyLoginOTP = async (req, res) => {
 
     let patient;
 
+    // ====================== Email ======================
+
     if (isEmail(identifier)) {
 
       patient = await Patient.findOne({
         email: identifier.toLowerCase(),
       });
 
-    } else if (isPhone(identifier)) {
+    }
+
+    // ====================== Mobile ======================
+
+    else if (isPhone(identifier)) {
 
       patient = await Patient.findOne({
         phone: identifier,
       });
 
-    } else {
+    }
+
+    // ====================== Invalid Identifier ======================
+
+    else {
 
       return res.status(400).json({
         success: false,
@@ -907,12 +933,18 @@ const verifyLoginOTP = async (req, res) => {
       });
     }
 
+    // ====================== Update Last Login ======================
+
     patient.lastLogin = new Date();
+
     await patient.save();
+
+    // ====================== Generate JWT ======================
 
     const token = jwt.sign(
       {
         id: patient._id,
+        role: "patient",   // ✅ Fixed
       },
       process.env.JWT_SECRET,
       {
@@ -920,7 +952,10 @@ const verifyLoginOTP = async (req, res) => {
       }
     );
 
+    // ====================== Login Notification ======================
+
     if (patient.email) {
+
       await sendNotification({
         userId: patient._id,
         userModel: "Patient",
@@ -935,9 +970,11 @@ const verifyLoginOTP = async (req, res) => {
           <p>Your account has been logged in successfully using OTP.</p>
         `,
       });
+
     }
 
     if (patient.phone) {
+
       await sendNotification({
         userId: patient._id,
         userModel: "Patient",
@@ -947,7 +984,10 @@ const verifyLoginOTP = async (req, res) => {
         message: "You have successfully logged in using OTP.",
         type: "GENERAL",
       });
+
     }
+
+    // ====================== Response ======================
 
     return res.status(200).json({
       success: true,
@@ -1049,7 +1089,6 @@ const updatePatientProfile = async (req, res) => {
         });
       }
 
-      // Check duplicate phone
       const existingPatient = await Patient.findOne({
         phone,
         _id: { $ne: patient._id },
@@ -1123,6 +1162,8 @@ const getAllPatients = async (req, res) => {
 
   }
 };
+
+// ====================== EXPORTS ======================
 
 module.exports = {
   registerPatient,

@@ -17,6 +17,12 @@ const client = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
+// ====================== Normalize Phone ======================
+
+const normalizePhone = (phone) => {
+  return String(phone).replace(/\D/g, "").slice(-10);
+};
+
 // ====================== SEND OTP ======================
 
 const sendOTP = async ({
@@ -81,36 +87,62 @@ const sendOTP = async ({
         `,
       });
 
-      console.log("Email OTP sent successfully.");
+      console.log("✅ Email OTP sent successfully.");
     }
 
     // ================= SMS =================
 
     if (channel === "sms") {
+
       if (!process.env.TWILIO_PHONE_NUMBER) {
         throw new Error("TWILIO_PHONE_NUMBER is missing in .env");
       }
 
-      await client.messages.create({
-        body: `Your MED-CONNECT verification code is ${otp}. It is valid for 5 minutes.`,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: `+91${identifier}`,
-      });
+      const verifiedNumber = process.env.TWILIO_VERIFIED_NUMBER;
 
-      console.log("SMS OTP sent successfully.");
+      console.log("Identifier :", identifier);
+      console.log("Verified   :", verifiedNumber);
+
+      if (
+        normalizePhone(identifier) ===
+        normalizePhone(verifiedNumber)
+      ) {
+
+        // Send SMS only to verified Twilio number
+        await client.messages.create({
+          body: `Your MED-CONNECT verification code is ${otp}. It is valid for 5 minutes.`,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: `+91${normalizePhone(identifier)}`,
+        });
+
+        console.log("✅ SMS OTP sent successfully.");
+
+      } else {
+
+        // Development Mode
+        console.log("\n========================================");
+        console.log("📱 DEVELOPMENT OTP");
+        console.log("Phone :", identifier);
+        console.log("OTP   :", otp);
+        console.log("========================================\n");
+
+      }
     }
 
     return {
       success: true,
       message: "OTP sent successfully.",
     };
+
   } catch (error) {
+
     console.error("Send OTP Error:", error);
 
     return {
       success: false,
       message: error.message || "Failed to send OTP.",
     };
+
   }
 };
 
@@ -122,6 +154,7 @@ const verifyOTP = async ({
   purpose,
 }) => {
   try {
+
     const otpRecord = await OTP.findOne({
       identifier,
       otp,
@@ -151,13 +184,16 @@ const verifyOTP = async ({
       success: true,
       message: "OTP verified successfully.",
     };
+
   } catch (error) {
+
     console.error("Verify OTP Error:", error);
 
     return {
       success: false,
       message: error.message || "OTP verification failed.",
     };
+
   }
 };
 

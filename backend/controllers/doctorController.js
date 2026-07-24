@@ -62,8 +62,12 @@ const registerDoctor = async (req, res) => {
       availableTime,
     });
 
+    // UPDATED TOKEN
     const token = jwt.sign(
-      { id: doctor._id },
+      {
+        id: doctor._id,
+        role: "doctor",
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
@@ -122,8 +126,12 @@ const loginDoctor = async (req, res) => {
       });
     }
 
+    // UPDATED TOKEN
     const token = jwt.sign(
-      { id: doctor._id },
+      {
+        id: doctor._id,
+        role: "doctor",
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",

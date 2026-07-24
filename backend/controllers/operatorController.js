@@ -45,14 +45,45 @@ const registerOperator = async (req, res) => {
   }
 };
 
-// ====================== Login Operator ======================
+/// ====================== Login Operator ======================
 
 const loginOperator = async (req, res) => {
   try {
 
-    const { email, password } = req.body;
+    let { identifier, password } = req.body;
 
-    const operator = await Operator.findOne({ email });
+    if (!identifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email/Mobile Number and Password are required",
+      });
+    }
+
+    identifier = identifier.trim();
+
+    let operator;
+
+    // ====================== Login Using Email ======================
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (emailRegex.test(identifier)) {
+
+      operator = await Operator.findOne({
+        email: identifier.toLowerCase(),
+      });
+
+    }
+
+    // ====================== Login Using Mobile ======================
+
+    else {
+
+      operator = await Operator.findOne({
+        phone: identifier,
+      });
+
+    }
 
     if (!operator) {
       return res.status(404).json({

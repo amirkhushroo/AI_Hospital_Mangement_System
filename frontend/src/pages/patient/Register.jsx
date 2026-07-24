@@ -6,6 +6,7 @@ import api from "../../services/api";
 import "./Register.css";
 
 function Register() {
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -20,6 +21,8 @@ function Register() {
 
   const [loading, setLoading] = useState(false);
 
+  // ================= HANDLE INPUT =================
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -27,56 +30,104 @@ function Register() {
     }));
   };
 
+  // ================= REGISTER =================
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // ================= Validation =================
+    // Name Validation
+    if (!formData.name.trim()) {
+      toast.error("Please enter your name.");
+      return;
+    }
 
+    // Email OR Phone Validation
     if (!formData.email && !formData.phone) {
       toast.error("Please enter either Email or Mobile Number.");
       return;
     }
 
     if (formData.email && formData.phone) {
-      toast.error("Register using either Email or Mobile Number, not both.");
+      toast.error(
+        "Please use either Email or Mobile Number, not both."
+      );
+      return;
+    }
+
+    // Password Validation
+    if (!formData.password) {
+      toast.error("Please enter your password.");
       return;
     }
 
     try {
+
       setLoading(true);
 
-      const response = await api.post("/patient/register", formData);
+      // Backend expects identifier
+      const payload = {
+        name: formData.name.trim(),
+        identifier: formData.email
+          ? formData.email.trim()
+          : formData.phone.trim(),
+        password: formData.password,
+        age: formData.age,
+        gender: formData.gender,
+        address: formData.address,
+      };
+
+      const response = await api.post(
+        "/patient/register",
+        payload
+      );
 
       if (response.data.success) {
+
         toast.success(response.data.message);
 
-        // ================= Email Registration =================
+        // Phone Registration
+        if (formData.phone) {
 
-        if (formData.email) {
-          navigate("/patient/login");
-          return;
+          navigate("/patient/verify-registration-otp", {
+            state: {
+              phone: formData.phone,
+            },
+          });
+
         }
 
-        // ================= Phone Registration =================
+        // Email Registration
+        else {
 
-        navigate("/patient/verify-registration-otp", {
-          state: {
-            phone: formData.phone,
-          },
-        });
+          navigate("/patient/login");
+
+        }
+
       }
+
     } catch (error) {
+
+      console.log(error);
+
       toast.error(
-        error.response?.data?.message || "Registration Failed"
+        error.response?.data?.message ||
+        "Registration Failed"
       );
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
 
   return (
+
     <div className="register-container">
+
       <div className="register-card">
+
         <h1>
           <Building2 size={22} />
           AI Hospital
@@ -161,7 +212,10 @@ function Register() {
             required
           />
 
-          <button type="submit" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "Registering..." : "Register"}
           </button>
 
@@ -170,13 +224,18 @@ function Register() {
         <div className="login-link">
           <p>
             Already have an account?{" "}
-            <Link to="/patient/login">Login</Link>
+            <Link to="/patient/login">
+              Login
+            </Link>
           </p>
         </div>
 
       </div>
+
     </div>
+
   );
+
 }
 
 export default Register;

@@ -9,6 +9,12 @@ const client = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
+// ====================== Normalize Phone Number ======================
+
+const normalizePhone = (phone) => {
+  return String(phone).replace(/\D/g, "").slice(-10);
+};
+
 // ====================== Send Notification ======================
 
 const sendNotification = async ({
@@ -53,25 +59,57 @@ const sendNotification = async ({
     // ====================== SMS ======================
 
     if (channel === "sms") {
-      try {
-        await client.messages.create({
-          body: message,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          to: `+91${recipient}`,
-        });
 
-        console.log("SMS sent successfully.");
+      const verifiedNumber = process.env.TWILIO_VERIFIED_NUMBER;
 
+      console.log("Recipient :", recipient);
+      console.log("Verified :", verifiedNumber);
+
+      if (
+        normalizePhone(recipient) ===
+        normalizePhone(verifiedNumber)
+      ) {
+
+        try {
+
+          await client.messages.create({
+            body: message,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: `+91${normalizePhone(recipient)}`,
+          });
+
+          console.log("✅ SMS sent successfully.");
+
+          response = {
+            success: true,
+          };
+
+        } catch (err) {
+
+          console.error("Twilio SMS Error:", err);
+
+          response = {
+            success: false,
+          };
+
+        }
+
+      } else {
+
+        console.log("\n========================================");
+        console.log("📱 DEVELOPMENT SMS");
+        console.log("Phone   :", recipient);
+        console.log("Title   :", title);
+        console.log("Message :", message);
+        console.log("========================================\n");
+
+        // Development mode
         response = {
           success: true,
         };
-      } catch (err) {
-        console.error("Twilio SMS Error:", err);
 
-        response = {
-          success: false,
-        };
       }
+
     }
 
     // ====================== Update Status ======================
@@ -86,13 +124,16 @@ const sendNotification = async ({
         ? "Notification sent successfully."
         : "Notification failed.",
     };
+
   } catch (error) {
+
     console.error("Notification Service Error:", error);
 
     return {
       success: false,
       message: "Notification service failed.",
     };
+
   }
 };
 

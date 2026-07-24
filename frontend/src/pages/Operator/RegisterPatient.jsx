@@ -12,11 +12,10 @@ const API_URL =
 const RegisterPatient = () => {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    identifier: "",
     password: "",
     age: "",
     gender: "",
-    phone: "",
     address: "",
   });
 
@@ -30,27 +29,44 @@ const RegisterPatient = () => {
   const registerPatient = async (e) => {
     e.preventDefault();
 
+    if (
+      !formData.name ||
+      !formData.identifier ||
+      !formData.password
+    ) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    const patientData = {
+      name: formData.name.trim(),
+      identifier: formData.identifier.trim(),
+      password: formData.password.trim(),
+      age: formData.age,
+      gender: formData.gender,
+      address: formData.address.trim(),
+    };
+
     try {
       const response = await fetch(`${API_URL}/api/patient/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(patientData),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert("Patient Registered Successfully");
+        alert(data.message);
 
         setFormData({
           name: "",
-          email: "",
+          identifier: "",
           password: "",
           age: "",
           gender: "",
-          phone: "",
           address: "",
         });
       } else {
@@ -85,61 +101,37 @@ const RegisterPatient = () => {
           <Input
             label="Full Name"
             type="text"
+            name="name"
             placeholder="Enter full name"
             value={formData.name}
-            onChange={(e) =>
-              handleChange({
-                target: {
-                  name: "name",
-                  value: e.target.value,
-                },
-              })
-            }
+            onChange={handleChange}
           />
 
           <Input
-            label="Email"
-            type="email"
-            placeholder="Enter email"
-            value={formData.email}
-            onChange={(e) =>
-              handleChange({
-                target: {
-                  name: "email",
-                  value: e.target.value,
-                },
-              })
-            }
+            label="Email / Mobile Number"
+            type="text"
+            name="identifier"
+            placeholder="Enter Email or Mobile Number"
+            value={formData.identifier}
+            onChange={handleChange}
           />
 
           <Input
             label="Password"
             type="password"
+            name="password"
             placeholder="Enter password"
             value={formData.password}
-            onChange={(e) =>
-              handleChange({
-                target: {
-                  name: "password",
-                  value: e.target.value,
-                },
-              })
-            }
+            onChange={handleChange}
           />
 
           <Input
             label="Age"
             type="number"
+            name="age"
             placeholder="Enter age"
             value={formData.age}
-            onChange={(e) =>
-              handleChange({
-                target: {
-                  name: "age",
-                  value: e.target.value,
-                },
-              })
-            }
+            onChange={handleChange}
           />
 
           <div className="input-group">
@@ -150,38 +142,12 @@ const RegisterPatient = () => {
               value={formData.gender}
               onChange={handleChange}
             >
-              <option value="">
-                Select Gender
-              </option>
-
-              <option value="Male">
-                Male
-              </option>
-
-              <option value="Female">
-                Female
-              </option>
-
-              <option value="Other">
-                Other
-              </option>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
           </div>
-
-          <Input
-            label="Phone Number"
-            type="text"
-            placeholder="Enter phone number"
-            value={formData.phone}
-            onChange={(e) =>
-              handleChange({
-                target: {
-                  name: "phone",
-                  value: e.target.value,
-                },
-              })
-            }
-          />
 
           <div className="input-group">
             <label>Address</label>

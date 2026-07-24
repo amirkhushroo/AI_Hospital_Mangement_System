@@ -15,7 +15,6 @@ const patientSchema = new mongoose.Schema(
       sparse: true,
       trim: true,
       lowercase: true,
-      default: null,
     },
 
     // Phone (Optional)
@@ -24,7 +23,6 @@ const patientSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
       trim: true,
-      default: null,
     },
 
     password: {

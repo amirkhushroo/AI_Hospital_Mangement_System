@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -186,7 +185,7 @@ const OperatorLogin = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
   });
 
@@ -253,10 +252,10 @@ const OperatorLogin = () => {
 
         <form onSubmit={handleSubmit}>
           <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            value={formData.email}
+            type="text"
+            name="identifier"
+            placeholder="Enter Email or Mobile Number"
+            value={formData.identifier}
             onChange={handleChange}
             required
           />

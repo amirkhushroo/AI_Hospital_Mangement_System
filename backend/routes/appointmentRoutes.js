@@ -19,10 +19,8 @@ const {
 } = require("../controllers/appointmentController");
 
 // =======================================================
-//                 APPOINTMENT ROUTES
+//                 PATIENT ROUTES
 // =======================================================
-
-// ====================== Patient Routes ======================
 
 // Book Appointment
 router.post("/book", authMiddleware, bookAppointment);
@@ -33,7 +31,9 @@ router.get("/patient", authMiddleware, getPatientAppointments);
 // Cancel Appointment
 router.put("/cancel/:id", authMiddleware, cancelAppointment);
 
-// ====================== Doctor Routes ======================
+// =======================================================
+//                 DOCTOR ROUTES
+// =======================================================
 
 // Get Logged-in Doctor Appointments
 router.get("/doctor", authMiddleware, getDoctorAppointments);
@@ -41,7 +41,9 @@ router.get("/doctor", authMiddleware, getDoctorAppointments);
 // Update Appointment Status
 router.put("/status/:id", authMiddleware, updateAppointmentStatus);
 
-// ====================== Operator Routes ======================
+// =======================================================
+//                OPERATOR ROUTES
+// =======================================================
 
 // Get All Appointments
 router.get(
