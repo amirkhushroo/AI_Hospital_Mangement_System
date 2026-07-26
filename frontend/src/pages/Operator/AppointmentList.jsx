@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
+
 
 const AppointmentList = () => {
   // ====================== States ======================
@@ -21,30 +19,30 @@ const AppointmentList = () => {
 
   // ====================== Fetch Appointments ======================
 
-  const fetchAppointments = async () => {
-    try {
-      const token = localStorage.getItem("operatorToken");
+const fetchAppointments = async () => {
+  try {
+    const token = localStorage.getItem("operatorToken");
 
-      const res = await fetch(
-        `${API_URL}/api/appointment/all`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const response = await api.get("/appointment/all", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      const data = await res.json();
+    const data = response.data;
 
-      if (data.success) {
-        setAppointments(data.appointments);
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.log(error);
+    if (data.success) {
+      setAppointments(data.appointments);
+    } else {
+      alert(data.message);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Failed to load appointments");
+  }
+};
+
+      
 
   // ====================== Search & Filter ======================
 
@@ -70,105 +68,103 @@ const AppointmentList = () => {
     // ====================== Update Status ======================
 
   const updateStatus = async (id, status) => {
-    try {
-      const token = localStorage.getItem("operatorToken");
+  try {
+    const token = localStorage.getItem("operatorToken");
 
-      const res = await fetch(
-        `${API_URL}/api/appointment/status/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Status Updated Successfully");
-        fetchAppointments();
-      } else {
-        alert(data.message);
+    const response = await api.put(
+      `/appointment/status/${id}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    );
 
+    const data = response.data;
+
+    if (data.success) {
+      alert("Status Updated Successfully");
+      fetchAppointments();
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update status");
+  }
+};
   // ====================== Cancel Appointment ======================
 
-  const cancelAppointment = async (id) => {
-    try {
-      const token = localStorage.getItem("operatorToken");
+ const cancelAppointment = async (id) => {
+  try {
+    const token = localStorage.getItem("operatorToken");
 
-      const res = await fetch(
-        `${API_URL}/api/appointment/cancel/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Appointment Cancelled Successfully");
-        fetchAppointments();
-      } else {
-        alert(data.message);
+    const response = await api.put(
+      `/appointment/cancel/${id}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (error) {
-      console.log(error);
+    );
+
+    const data = response.data;
+
+    if (data.success) {
+      alert("Appointment Cancelled Successfully");
+      fetchAppointments();
+    } else {
+      alert(data.message);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Failed to cancel appointment");
+  }
+};
 
   // ====================== Reschedule Appointment ======================
 
-  const rescheduleAppointment = async () => {
-    try {
-      if (!newDate || !newTime) {
-        return alert("Please select date and time.");
-      }
-
-      const token = localStorage.getItem("operatorToken");
-
-      const res = await fetch(
-        `${API_URL}/api/appointment/reschedule/${editingAppointment}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            appointmentDate: newDate,
-            appointmentTime: newTime,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Appointment Rescheduled Successfully");
-
-        setEditingAppointment(null);
-        setNewDate("");
-        setNewTime("");
-
-        fetchAppointments();
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.log(error);
+ const rescheduleAppointment = async () => {
+  try {
+    if (!newDate || !newTime) {
+      return alert("Please select date and time.");
     }
-  };
+
+    const token = localStorage.getItem("operatorToken");
+
+    const response = await api.put(
+      `/appointment/reschedule/${editingAppointment}`,
+      {
+        appointmentDate: newDate,
+        appointmentTime: newTime,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = response.data;
+
+    if (data.success) {
+      alert("Appointment Rescheduled Successfully");
+
+      setEditingAppointment(null);
+      setNewDate("");
+      setNewTime("");
+
+      fetchAppointments();
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Failed to reschedule appointment");
+  }
+};
 
   // ====================== Load Appointments ======================
 
