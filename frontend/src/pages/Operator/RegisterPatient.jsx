@@ -3,11 +3,8 @@ import Card from "../../components/UI/Card";
 import Button from "../../components/UI/Button";
 import Input from "../../components/UI/Input";
 import PageTitle from "../../components/UI/PageTitle";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const RegisterPatient = () => {
   const [formData, setFormData] = useState({
@@ -48,15 +45,12 @@ const RegisterPatient = () => {
     };
 
     try {
-      const response = await fetch(`${API_URL}/api/patient/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(patientData),
-      });
+   const response = await api.post(
+  "/patient/register",
+  patientData
+);
 
-      const data = await response.json();
+const data = response.data;
 
       if (data.success) {
         alert(data.message);
