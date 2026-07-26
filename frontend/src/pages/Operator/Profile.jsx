@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const API_URL =
   import.meta.env.MODE === "development"
     ? "http://localhost:5000"
-    : "https://your-backend-url.com";
+    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const Profile = () => {
   const navigate = useNavigate();

@@ -3,11 +3,7 @@ import { Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 import "./OperatorLogin.css";
-
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://your-backend-url.com";
+import api from "../../services/api";
 
 /* ===========================
    Liquid Chrome Background
@@ -204,15 +200,9 @@ const OperatorLogin = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_URL}/api/operator/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post("/operator/login", formData);
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         localStorage.setItem("operatorToken", data.token);
