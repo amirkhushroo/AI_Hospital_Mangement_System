@@ -2,11 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import Card from "../../components/UI/Card";
 import Button from "../../components/UI/Button";
 import PageTitle from "../../components/UI/PageTitle";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const UploadReports = () => {
   const token = localStorage.getItem("operatorToken");
@@ -25,13 +22,13 @@ const UploadReports = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/patient/all`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+     const response = await api.get("/patient/all", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         setPatients(data.patients);
@@ -48,13 +45,13 @@ const UploadReports = () => {
 
   const fetchAppointments = async (selectedPatientId) => {
     try {
-      const res = await fetch(`${API_URL}/api/appointment/all`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/appointment/all", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         const filtered = data.appointments.filter(
@@ -106,15 +103,18 @@ const UploadReports = () => {
       formData.append("reportName", reportName);
       formData.append("report", reportFile);
 
-      const res = await fetch(`${API_URL}/api/report/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+    const response = await api.post(
+  "/report/upload",
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         alert("Report Uploaded Successfully");
@@ -133,7 +133,9 @@ const UploadReports = () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Server Error");
+      alert(
+  error.response?.data?.message || "Server Error"
+);
     }
   };
 

@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -32,13 +29,13 @@ const Profile = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_URL}/api/operator/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/operator/profile", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         setProfile({
@@ -51,7 +48,10 @@ const Profile = () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to load profile.");
+     alert(
+  error.response?.data?.message ||
+  "Failed to load profile."
+);
     } finally {
       setLoading(false);
     }
@@ -63,19 +63,20 @@ const Profile = () => {
     try {
       setUpdating(true);
 
-      const res = await fetch(`${API_URL}/api/operator/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: profile.name,
-          phone: profile.phone,
-        }),
-      });
+      const response = await api.put(
+  "/operator/profile",
+  {
+    name: profile.name,
+    phone: profile.phone,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         alert("Profile Updated Successfully");
@@ -85,7 +86,10 @@ const Profile = () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Server Error");
+     alert(
+  error.response?.data?.message ||
+  "Server Error"
+);
     } finally {
       setUpdating(false);
     }

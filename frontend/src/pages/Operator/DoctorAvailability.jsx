@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import Card from "../../components/UI/Card";
 import PageTitle from "../../components/UI/PageTitle";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const DoctorAvailability = () => {
   const [doctors, setDoctors] = useState([]);
@@ -25,13 +22,13 @@ const DoctorAvailability = () => {
         return;
       }
 
-      const res = await fetch(`${API_URL}/api/doctor/all`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/doctor/all", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         setDoctors(data.doctors);
@@ -40,7 +37,10 @@ const DoctorAvailability = () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to load doctors.");
+      alert(
+  error.response?.data?.message ||
+  "Failed to load doctors."
+);
     } finally {
       setLoading(false);
     }

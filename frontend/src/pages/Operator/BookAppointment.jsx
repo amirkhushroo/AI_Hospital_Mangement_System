@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import Card from "../../components/UI/Card";
 import Button from "../../components/UI/Button";
 import PageTitle from "../../components/UI/PageTitle";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const BookAppointment = () => {
   const [patients, setPatients] = useState([]);
@@ -27,14 +24,13 @@ const BookAppointment = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/patient/all`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/patient/all", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-      const data = await res.json();
-
+const data = response.data;
       if (data.success) {
         setPatients(data.patients);
       } else {
@@ -49,13 +45,13 @@ const BookAppointment = () => {
 
   const fetchDoctors = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/doctor/all`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const response = await api.get("/doctor/all", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-      const data = await res.json();
+const data = response.data;
 
       if (data.success) {
         setDoctors(data.doctors);
@@ -97,16 +93,17 @@ const BookAppointment = () => {
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/appointment/book`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post(
+  "/appointment/book",
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
-      const data = await res.json();
+const data = response.data;;
 
       if (data.success) {
         alert("Appointment booked successfully.");
@@ -123,7 +120,9 @@ const BookAppointment = () => {
       }
     } catch (error) {
       console.error(error);
-      alert("Server Error");
+     alert(
+  error.response?.data?.message || "Server Error"
+);
     }
   };
 

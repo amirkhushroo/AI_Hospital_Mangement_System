@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import Card from "../../components/UI/Card";
 import Button from "../../components/UI/Button";
 import PageTitle from "../../components/UI/PageTitle";
+import api from "../../services/api";
 
-const API_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5000"
-    : "https://ai-hospital-mangement-system-1.onrender.com/api";
 
 const PatientManagement = () => {
   const [patients, setPatients] = useState([]);
@@ -31,25 +28,26 @@ const fetchPatients = async () => {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/patient/all`, {
-      method: "GET",
+    const response = await api.get("/patient/all", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    const data = await res.json();
+    const data = response.data;
 
     if (data.success) {
-  console.log("Patients:", data.patients);
-  setPatients(data.patients);
-} else {
-  console.log(data);
-  alert(data.message);
-}
+      console.log("Patients:", data.patients);
+      setPatients(data.patients);
+    } else {
+      alert(data.message);
+    }
   } catch (error) {
     console.error(error);
-    alert("Failed to load patients.");
+    alert(
+      error.response?.data?.message ||
+        "Failed to load patients."
+    );
   }
 };
 
@@ -77,36 +75,37 @@ useEffect(() => {
 
   // ====================== Update Patient ======================
 
-  const updatePatient = async () => {
-    try {
-      const res = await fetch(
-        `${API_URL}/api/patient/update/${editingId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Patient Updated Successfully");
-
-        setEditingId(null);
-
-        fetchPatients();
-      } else {
-        alert(data.message);
+ const updatePatient = async () => {
+  try {
+    const response = await api.put(
+      `/patient/update/${editingId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    );
 
+    const data = response.data;
+
+    if (data.success) {
+      alert("Patient Updated Successfully");
+
+      setEditingId(null);
+
+      fetchPatients();
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert(
+      error.response?.data?.message ||
+        "Failed to update patient."
+    );
+  }
+};
   // ====================== Search ======================
 
   const filteredPatients = patients.filter((patient) =>
