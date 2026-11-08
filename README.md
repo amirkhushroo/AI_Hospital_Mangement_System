@@ -1,5 +1,5 @@
 
-# 🏥 AI Hospital Management System
+#  AI Hospital Management System
 
 A full-stack AI-powered Hospital Management System built using the **MERN Stack (MongoDB, Express.js, React.js, Node.js)**. 
 The system provides separate portals for **Patients, Doctors, and Admin**, along with an **AI Symptom Checker** that helps patients understand possible diseases based on their symptoms.
@@ -7,9 +7,9 @@ The system provides separate portals for **Patients, Doctors, and Admin**, along
  WEBSITE LINK ~https://ai-hospital-mangement-system.vercel.app/
 ---
 
-# 📌 Features
+#  Features
 
-## 👤 Patient Module
+##  Patient Module
 
 * Patient Registration & Login
 * JWT Authentication
@@ -23,7 +23,7 @@ The system provides separate portals for **Patients, Doctors, and Admin**, along
 
 ---
 
-## 👨‍⚕️ Doctor Module
+##  Doctor Module
 
 * Doctor Login
 * Doctor Dashboard
@@ -36,7 +36,7 @@ The system provides separate portals for **Patients, Doctors, and Admin**, along
 
 ---
 
-## 👨‍💼 Admin Module
+##  Admin Module
 
 * Admin Login
 * Dashboard Analytics
@@ -48,7 +48,7 @@ The system provides separate portals for **Patients, Doctors, and Admin**, along
 
 ---
 
-## 🤖 AI Symptom Checker
+##  AI Symptom Checker
 
 Patients can enter their symptoms in natural language.
 
@@ -70,7 +70,7 @@ The AI analyzes the symptoms and predicts:
 
 ---
 
-# 🛠 Tech Stack
+#  Tech Stack
 
 ## Frontend
 
@@ -105,7 +105,7 @@ The AI analyzes the symptoms and predicts:
 
 ---
 
-# 📂 Project Structure
+#  Project Structure
 
 ```
 AI-Hospital-Management-System/
@@ -141,7 +141,7 @@ AI-Hospital-Management-System/
 
 ---
 
-# 🔐 Authentication
+#  Authentication
 
 Three different authentication systems are implemented.
 
@@ -153,7 +153,7 @@ JWT Tokens are used for secure authentication and authorization.
 
 ---
 
-# 📊 Modules
+#  Modules
 
 ## Patient
 
@@ -185,7 +185,7 @@ JWT Tokens are used for secure authentication and authorization.
 
 ---
 
-# 🚀 Installation
+#  Installation
 
 ## Clone Repository
 
@@ -215,7 +215,7 @@ npm run dev
 
 ---
 
-# ⚙ Environment Variables
+#  Environment Variables
 
 Create a `.env` file inside the backend folder.
 
@@ -231,7 +231,7 @@ GEMINI_API_KEY=Your_Gemini_API_Key
 
 ---
 
-# 🌐 API Endpoints
+#  API Endpoints
 
 ## Patient
 
@@ -280,7 +280,7 @@ GET /api/admin/ai-reports
 ```
 ---
 
-# 🎯 Future Improvements
+#  Future Improvements
 
 * Online Payment Gateway
 * Video Consultation
@@ -295,7 +295,7 @@ GET /api/admin/ai-reports
 
 ---
 
-# 👥 Team Members
+#  Team Members
 
 This project was developed collaboratively by:
 
@@ -309,6 +309,6 @@ This project was developed collaboratively by:
 | **Moh Avish**            | AI Symptom Checker |
 ---
  
-# 📄 License
+#  License
 
 This project is developed for educational and learning purposes.
